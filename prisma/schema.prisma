@@ -1,0 +1,283 @@
+// Tempo — schéma Prisma (mode solo, un seul athlète : Killian)
+// Simplifié : pas de multi-tenant. On garde UN profil athlète + ses sources connectées.
+// Auth : en solo tu peux te contenter d'un passcode + tes tokens en variables d'env,
+// donc on n'embarque pas les tables Account/Session multi-utilisateurs d'Auth.js.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Le coureur (singleton) ──────────────────────────────────────────────
+model AthleteProfile {
+  id        String   @id @default("me") // singleton : il n'y a que toi
+  firstName String
+  weightKg  Float?
+  city      String?
+  country   String?
+
+  // Repères physio — pré-remplis depuis Strava, ajustables
+  maxHr                  Int? // ~196 (estimé d'après l'âge)
+  restHr                 Int? // À MESURER (placeholder 45) — affine le TRIMP
+  thresholdPaceSecPerKm  Int? // ~236 s/km (≈ 3:56/km), dérivé de tes zones "RacePace"
+  runningPowerFtp        Int? // 138 W (estimé)
+
+  // Bornes de zones FC (bpm) et allure (s/km), tableaux ordonnés bas→haut
+  hrZonesBpm    Int[] // ex: [125,156,172,187] = hauts de Z1..Z4 (Z5 = au-dessus)
+  paceZonesSecKm Int[] // ex: [305,262,236,221,207] hauts de Z1..Z5
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  providers     ConnectedProvider[]
+  activities    Activity[]
+  dailyMetrics  DailyMetric[]
+  goals         Goal[]
+  plans         Plan[]
+  conversations Conversation[]
+  scores        ScoreSnapshot[]
+  notifications Notification[]
+}
+
+// ── Sources connectées (Strava, GetFast…) ───────────────────────────────
+model ConnectedProvider {
+  id           String   @id @default(cuid())
+  athleteId    String
+  provider     Provider
+  externalId   String? // ex: id athlète Strava
+  // Tokens CHIFFRÉS au repos (ne jamais stocker en clair)
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  scope        String?
+  connectedAt  DateTime @default(now())
+
+  athlete AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([athleteId, provider])
+}
+
+// ── Activités (modèle unifié multisport) ─────────────────────────────────
+model Activity {
+  id           String   @id @default(cuid())
+  athleteId    String
+  source       Provider
+  externalId   String? // id Strava / nom de fichier FIT
+  sport        Sport
+  name         String?
+  startedAt    DateTime
+  // Résumé
+  distanceM       Float?
+  movingTimeS     Int?
+  elapsedTimeS    Int?
+  elevationGainM  Float?
+  avgSpeedMs      Float?
+  maxSpeedMs      Float?
+  avgHr           Int?
+  maxHr           Int?
+  avgCadence      Float?
+  avgPowerW       Float?
+  calories        Int?
+  // Métriques calculées (par notre moteur, pas par le LLM)
+  trainingLoad    Float? // charge (rEffort Strava ou TRIMP/rTSS calculé)
+  decoupling      Float? // dérive cardiaque % (durabilité aérobie)
+  hrZoneSecs      Int[]  // temps passé par zone FC (s)
+  paceZoneSecs    Int[]  // temps passé par zone d'allure (s)
+  // Fichiers lourds hors-ligne
+  fitFileUrl      String?
+  streamsUrl      String? // streams (FC, allure, alti, GPS, cadence) en blob
+
+  rawJson   Json? // payload source brut pour retraitement
+  createdAt DateTime @default(now())
+
+  athlete AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([source, externalId])
+  @@index([athleteId, startedAt])
+}
+
+// ── Métrique quotidienne (forme / fraîcheur / récup) ─────────────────────
+model DailyMetric {
+  id          String   @id @default(cuid())
+  athleteId   String
+  date        DateTime @db.Date
+  dayLoad     Float? // somme de charge du jour
+  ctl         Float? // forme chronique (EWMA 42 j)
+  atl         Float? // fatigue aiguë (EWMA 7 j)
+  tsb         Float? // fraîcheur = ctl - atl
+  hrv         Float? // ms (si dispo)
+  restHr      Int?
+  sleepScore  Int?
+  bodyBattery Int?
+  readiness   Int? // 0-100, agrégat
+  notes       String?
+
+  athlete AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([athleteId, date])
+}
+
+// ── Objectif (ta course) ─────────────────────────────────────────────────
+model Goal {
+  id            String   @id @default(cuid())
+  athleteId     String
+  name          String // "Ultra Marin — l'Avor"
+  sport         Sport
+  raceDate      DateTime
+  distanceM     Float?
+  elevationM    Float?
+  targetTimeS   Int? // objectif chrono (null = à définir)
+  priority      Int      @default(1) // A=1, B=2, C=3
+  status        GoalStatus @default(ACTIVE)
+  notes         String?
+
+  athlete AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  plans   Plan[]
+}
+
+// ── Plan d'entraînement structuré ────────────────────────────────────────
+model Plan {
+  id        String   @id @default(cuid())
+  athleteId String
+  goalId    String?
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  generatedBy String? // "gpt-5.5" | "manual"
+  createdAt DateTime @default(now())
+
+  athlete AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  goal    Goal?    @relation(fields: [goalId], references: [id])
+  weeks   PlanWeek[]
+}
+
+model PlanWeek {
+  id          String @id @default(cuid())
+  planId      String
+  weekIndex   Int
+  startDate   DateTime
+  phase       String? // base | build | peak | taper
+  targetKm    Float?
+  targetLoad  Float?
+
+  plan     Plan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  workouts Workout[]
+}
+
+model Workout {
+  id           String   @id @default(cuid())
+  weekId       String
+  date         DateTime
+  sport        Sport
+  title        String
+  description  String? // séance structurée en texte
+  structureJson Json?  // blocs (échauffement / intervalles / retour au calme)
+  targetDistanceM Float?
+  targetDurationS Int?
+  status       WorkoutStatus @default(PLANNED)
+  garminPushed Boolean  @default(false)
+  activityId   String? // activité réalisée correspondante
+
+  week PlanWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
+}
+
+// ── Coach conversationnel ────────────────────────────────────────────────
+model Conversation {
+  id        String   @id @default(cuid())
+  athleteId String
+  title     String?
+  createdAt DateTime @default(now())
+
+  athlete  AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  messages CoachMessage[]
+}
+
+model CoachMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           MessageRole
+  content        String
+  // Traçabilité : ce que le coach avait sous les yeux + son raisonnement
+  contextJson    Json?
+  reasoning      String?
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+// ── Score propriétaire 0-100 ─────────────────────────────────────────────
+model ScoreSnapshot {
+  id          String   @id @default(cuid())
+  athleteId   String
+  date        DateTime @db.Date
+  overall     Int
+  endurance   Int
+  resistance  Int
+  speed       Int
+  recovery    Int
+  regularity  Int
+  inputsJson  Json? // valeurs ayant servi au calcul (auditabilité)
+
+  athlete AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([athleteId, date])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  athleteId String
+  type      NotificationType
+  title     String
+  body      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  athlete AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+}
+
+// ── Enums ────────────────────────────────────────────────────────────────
+enum Provider {
+  STRAVA
+  GETFAST
+  GARMIN
+  FIT_IMPORT
+}
+
+enum Sport {
+  RUN
+  TRAIL
+  ULTRA
+  RIDE
+  TRIATHLON
+  OTHER
+}
+
+enum GoalStatus {
+  ACTIVE
+  DONE
+  ABANDONED
+}
+
+enum WorkoutStatus {
+  PLANNED
+  DONE
+  SKIPPED
+  MODIFIED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum NotificationType {
+  COACH_DAILY
+  RECOVERY_ALERT
+  WORKOUT_REMINDER
+  GOAL_UPDATE
+}
