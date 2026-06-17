@@ -1,12 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import OpenAI from "openai";
 import { planSystemPrompt } from "./prompt";
 import { PlanZ } from "./schema";
 import { safeWeeklyKm } from "./safety";
 import { buildAthleteContext } from "../coach/athlete-context";
+import { aiClient, AI_MODEL } from "../ai";
 
 const prisma = new PrismaClient();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = aiClient();
 const DAY = 86400000;
 
 /** Génère, sécurise et enregistre un plan jusqu'à la course. */
@@ -22,7 +22,7 @@ export async function generatePlan(athleteId = "me") {
   const context = await buildAthleteContext();
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-5.5",
+    model: AI_MODEL,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: planSystemPrompt(weeksRemaining) },

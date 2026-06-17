@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { COACH_SYSTEM_PROMPT, flagUnsafeAdvice } from "@/lib/coach/system-prompt";
 import { buildAthleteContext } from "@/lib/coach/athlete-context";
+import { aiClient, AI_MODEL } from "@/lib/ai";
 
 export const runtime = "nodejs";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = aiClient();
 
 /**
  * POST /api/coach
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const context = await buildAthleteContext();
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.5", // sortie avril 2026 ; bascule sur gpt-5.4-mini si besoin de coût
+      model: AI_MODEL,
       messages: [
         { role: "system", content: COACH_SYSTEM_PROMPT },
         {
