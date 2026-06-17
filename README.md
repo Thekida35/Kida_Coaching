@@ -66,6 +66,7 @@ pnpm dev              # lance l'app
 | `src/app/api/plan/generate/route.ts` | `POST` → génère et enregistre le plan. |
 | `src/components/PlanActions.tsx` + `src/app/plan/page.tsx` | UI : génère/affiche le plan (semaines + séances). |
 | `src/lib/seed.ts` + `src/app/api/admin/seed/route.ts` | Seed partagé + route d'init **sans terminal** (téléphone). |
+| `src/lib/ingest/garmin.ts` + `src/app/api/import/garmin/route.ts` | **Import de l'export Garmin** `summarizedActivities.json` (tout l'historique d'un coup). |
 
 ## Conformité (rappel)
 

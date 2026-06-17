@@ -39,6 +39,9 @@ export interface NormalizedActivity {
   calories?: number | null;
   relativeEffort?: number | null; // fourni par Strava uniquement
   streams?: ActivityStreams;
+  // Zones déjà calculées par la source (ex. Garmin fournit hrTimeInZone)
+  hrZoneSecs?: number[];
+  paceZoneSecs?: number[];
   raw?: unknown;
 }
 
@@ -73,16 +76,16 @@ export function toActivityData(n: NormalizedActivity, a: AthleteRefs) {
     maxHr: a.maxHr ?? null,
   });
 
-  let hrZoneSecs: number[] = [];
-  let paceZoneSecs: number[] = [];
+  let hrZoneSecs: number[] = n.hrZoneSecs ?? [];
+  let paceZoneSecs: number[] = n.paceZoneSecs ?? [];
   let decouplingPct: number | null = null;
 
   const st = n.streams;
   if (st?.timeS?.length) {
-    if (st.hr?.length) {
+    if (!hrZoneSecs.length && st.hr?.length) {
       hrZoneSecs = timeInZones(st.timeS, st.hr, (v) => hrZone(v, a.hrZonesBpm), 5);
     }
-    if (st.speedMs?.length) {
+    if (!paceZoneSecs.length && st.speedMs?.length) {
       const zoneCount = a.paceZonesSecKm.length + 1;
       paceZoneSecs = timeInZones(
         st.timeS,

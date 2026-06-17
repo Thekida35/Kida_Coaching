@@ -52,3 +52,16 @@ export async function ingestFit(n: NormalizedActivity, athleteId = "me") {
   await recomputeDailyMetrics(athleteId);
   return saved;
 }
+
+/** Ingestion de l'export Garmin summarizedActivities.json (plusieurs activités). */
+export async function ingestGarminSummaries(jsonText: string, athleteId = "me") {
+  const { parseGarminSummaries } = await import("./garmin");
+  const activities = parseGarminSummaries(jsonText);
+  let count = 0;
+  for (const a of activities) {
+    await upsertActivity(a, athleteId);
+    count++;
+  }
+  await recomputeDailyMetrics(athleteId);
+  return count;
+}
