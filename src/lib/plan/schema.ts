@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-/** Schéma de sortie attendu de GPT‑5.5 pour un plan. Validé avant stockage. */
+/** Schéma de sortie attendu du LLM pour un plan. Validé avant stockage. */
 export const WorkoutZ = z.object({
-  dayOffset: z.number().int().min(0).max(6), // 0 = lundi
+  dayOffset: z.number().int().min(0).max(6).default(0), // 0 = lundi
   sport: z.enum(["RUN", "TRAIL", "ULTRA", "RIDE", "OTHER"]),
   type: z.enum([
     "easy",
@@ -23,15 +23,15 @@ export const WorkoutZ = z.object({
 });
 
 export const WeekZ = z.object({
-  weekIndex: z.number().int().min(0),
+  weekIndex: z.number().int().min(0).default(0),
   phase: z.enum(["base", "build", "peak", "taper", "race"]),
   focus: z.string().default(""),
-  targetKm: z.number().nonnegative(),
+  targetKm: z.number().nonnegative().default(0),
   workouts: z.array(WorkoutZ).default([]),
 });
 
 export const PlanZ = z.object({
-  name: z.string().min(1),
+  name: z.string().default("Plan vers l'objectif"),
   rationale: z.string().default(""),
   weeks: z.array(WeekZ).min(1),
 });

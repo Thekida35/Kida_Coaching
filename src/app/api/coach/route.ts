@@ -22,11 +22,11 @@ export async function POST(req: NextRequest) {
     const completion = await openai.chat.completions.create({
       model: AI_MODEL,
       messages: [
-        { role: "system", content: COACH_SYSTEM_PROMPT },
         {
           role: "system",
           content:
-            "CONTEXTE ATHLÈTE (chiffres factuels, déjà calculés — ne pas recalculer) :\n" +
+            COACH_SYSTEM_PROMPT +
+            "\n\nCONTEXTE ATHLÈTE (chiffres factuels, déjà calculés — ne pas recalculer) :\n" +
             JSON.stringify(context, null, 2),
         },
         ...(Array.isArray(messages) ? messages : []),

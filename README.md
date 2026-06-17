@@ -1,7 +1,7 @@
 # Tempo — starter (mode solo)
 
 Coach d'endurance IA personnel, branché sur tes données. **Conçu pour un seul athlète : toi.**
-Stack : Next.js 15 · TypeScript · Prisma/PostgreSQL · OpenAI GPT‑5.5 · MCP GetFast.
+Stack : Next.js 15 · TypeScript · Prisma/PostgreSQL · Gemini (compatible OpenAI) · MCP GetFast.
 
 > « Tempo » est un nom de code provisoire.
 
@@ -37,7 +37,7 @@ pnpm dev              # lance l'app
 | `src/lib/metrics.test.ts` | Tests unitaires — *on valide avant de faire confiance aux chiffres*. |
 | `src/lib/coach/system-prompt.ts` | Coach **garde-fous** : n'invente aucun chiffre, plafonne la charge, non médical, conscient de l'ischio. |
 | `src/lib/coach/athlete-context.ts` | Le *grounding* : profil vivant envoyé au coach (métriques calculées, pas de brut). |
-| `src/app/api/coach/route.ts` | Endpoint coach → GPT‑5.5 avec contexte + vérif post-réponse. |
+| `src/app/api/coach/route.ts` | Endpoint coach → Gemini avec contexte + vérif post-réponse. |
 | `src/lib/ingest/fit.ts` | Parseur FIT → activité normalisée (tes fichiers, voie sans API). |
 | `src/lib/ingest/normalize.ts` | Forme pivot + mapper qui calcule charge/zones/découplage. |
 | `src/lib/ingest/aggregate.ts` | Agrégation pure par jour → CTL/ATL/TSB (testée). |
@@ -61,7 +61,7 @@ pnpm dev              # lance l'app
 | `src/app/score/page.tsx` | **Score** : note globale + radar + 5 dimensions. |
 | `src/app/plan/page.tsx` | **Plan** : état vide invitant à générer (prochaine brique). |
 | `src/components/{ReadinessRing,Radar,ZoneBar}.tsx` | Composants signature (SVG). |
-| `src/lib/plan/{schema,prompt,generate,safety}.ts` | **Génération de plan** GPT‑5.5 (sortie JSON validée + garde-fous volume/affûtage). |
+| `src/lib/plan/{schema,prompt,generate,safety}.ts` | **Génération de plan** Gemini (sortie JSON validée + garde-fous volume/affûtage). |
 | `src/lib/plan/safety.test.ts` | Tests des garde-fous de plan. |
 | `src/app/api/plan/generate/route.ts` | `POST` → génère et enregistre le plan. |
 | `src/components/PlanActions.tsx` + `src/app/plan/page.tsx` | UI : génère/affiche le plan (semaines + séances). |
@@ -83,7 +83,7 @@ Le coach ici ne voit que des **métriques dérivées**, pas le brut API. Le brut
    - Pondération : Endurance 30 % · Résistance 15 % · Vitesse 15 % · Récupération 20 % · Régularité 20 %.
    - Lecture : `GET /api/score` (dernier) ou `GET /api/score?fresh=1` (recalcul à la volée).
    - ⚠️ Ce sont des heuristiques **calibrables** (inputs stockés dans `ScoreSnapshot.inputsJson` pour audit).
-3. ✅ **Génération de plan** (fait) : `POST /api/plan/generate` → GPT‑5.5 produit des semaines/séances
+3. ✅ **Génération de plan** (fait) : `POST /api/plan/generate` → Gemini produit des semaines/séances
    structurées calées sur ta forme, **bornées** (+10 %/sem max) avec **affûtage** forcé avant la course.
    Générable depuis l'onglet Plan. (Push *parcours* Garmin possible via GetFast `course_push_to_garmin` ;
    le push de *séances structurées* dépend de la Training API → étape ultérieure.)

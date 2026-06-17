@@ -25,14 +25,22 @@ export async function generatePlan(athleteId = "me") {
     model: AI_MODEL,
     response_format: { type: "json_object" },
     messages: [
-      { role: "system", content: planSystemPrompt(weeksRemaining) },
-      { role: "system", content: "CONTEXTE ATHLÈTE (factuel) :\n" + JSON.stringify(context, null, 2) },
+      {
+        role: "system",
+        content:
+          planSystemPrompt(weeksRemaining) +
+          "\n\nCONTEXTE ATHLÈTE (factuel) :\n" +
+          JSON.stringify(context, null, 2),
+      },
       { role: "user", content: `Génère mon plan sur ${weeksRemaining} semaines jusqu'à la course (${goal.name}).` },
     ],
   });
 
   const raw = completion.choices[0]?.message?.content ?? "{}";
-  const parsed = PlanZ.parse(JSON.parse(raw));
+  // Gemini peut renvoyer l'objet {name,weeks}, un tableau [plan], ou directement
+  // la liste des semaines, ou un objet enveloppe {plan:{...}}. On extrait proprement.
+  const payload = extractPlan(JSON.parse(raw));
+  const parsed = PlanZ.parse(payload);
 
   // ── Garde-fous déterministes sur le volume hebdo ──
   const ordered = [...parsed.weeks].sort((a, b) => a.weekIndex - b.weekIndex);
@@ -52,7 +60,7 @@ export async function generatePlan(athleteId = "me") {
       name: parsed.name,
       startDate: start,
       endDate,
-      generatedBy: "gpt-5.5",
+      generatedBy: AI_MODEL,
       weeks: {
         create: ordered.map((w, idx) => {
           const weekStart = new Date(start.getTime() + idx * 7 * DAY);
@@ -88,4 +96,42 @@ function nextMonday(): Date {
   const day = d.getDay(); // 0=dim
   const add = day === 1 ? 0 : (8 - day) % 7 || 7;
   return new Date(d.getTime() + add * DAY);
+}
+
+/**
+ * Extrait l'objet plan {name, rationale, weeks} quel que soit l'emballage renvoyé
+ * par le LLM : objet direct, tableau [plan], liste de semaines, ou {plan:{...}}.
+ */
+function extractPlan(input: any): any {
+  let p = input;
+  for (let i = 0; i < 4; i++) {
+    if (Array.isArray(p)) {
+      // tableau de semaines (chaque élément a workouts/weekIndex/phase) ?
+      if (p.length && (p[0]?.workouts || p[0]?.weekIndex != null || p[0]?.phase)) {
+        return { name: "Plan vers l'objectif", rationale: "", weeks: p };
+      }
+      p = p[0] ?? {};
+      continue;
+    }
+    if (p && typeof p === "object") {
+      if (Array.isArray(p.weeks)) {
+        if (!p.name) p.name = "Plan vers l'objectif";
+        return p;
+      }
+      const wrap = ["plan", "trainingPlan", "data", "result", "response", "output"].find(
+        (k) => p[k] != null
+      );
+      if (wrap) {
+        p = p[wrap];
+        continue;
+      }
+      const keys = Object.keys(p);
+      if (keys.length === 1) {
+        p = p[keys[0]];
+        continue;
+      }
+    }
+    break;
+  }
+  return p;
 }

@@ -6,7 +6,7 @@ import OpenAI from "openai";
  * Doc : https://ai.google.dev/gemini-api/docs/openai
  *
  * Pour repasser à OpenAI plus tard : mets OPENAI_API_KEY, enlève le baseURL,
- * et change AI_MODEL (ex. "gpt-5.5").
+ * et change AI_MODEL pour un modèle OpenAI.
  */
 export const AI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 

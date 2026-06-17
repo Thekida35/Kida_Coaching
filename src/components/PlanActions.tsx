@@ -30,7 +30,7 @@ export default function PlanActions({ hasPlan }: { hasPlan: boolean }) {
         {loading ? "Génération en cours…" : hasPlan ? "Régénérer le plan" : "Générer mon plan"}
       </button>
       {error && <p style={{ color: "var(--coral)", fontSize: 12, marginTop: 10, textAlign: "center" }}>{error}</p>}
-      {loading && <p style={{ color: "var(--faint)", fontSize: 12, marginTop: 10, textAlign: "center" }}>GPT‑5.5 construit ton plan, calé sur ta forme — quelques secondes.</p>}
+      {loading && <p style={{ color: "var(--faint)", fontSize: 12, marginTop: 10, textAlign: "center" }}>Gemini construit ton plan, calé sur ta forme — quelques secondes.</p>}
     </div>
   );
 }
