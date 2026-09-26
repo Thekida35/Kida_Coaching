@@ -33,7 +33,7 @@ export async function api(path: string) {
   return r.json();
 }
 
-type Act = { id: number; name: string; sport_type: string; start_date_local: string; description?: string; distance: number; moving_time: number; elapsed_time: number; suffer_score?: number; workout_type?: number };
+type Act = { id: number; name: string; sport_type: string; start_date_local: string; description?: string; distance: number; moving_time: number; elapsed_time: number; suffer_score?: number; workout_type?: number; average_heartrate?: number; max_heartrate?: number; total_elevation_gain?: number };
 
 /** Même forme que les activités lues par le hub (connecteur Strava). */
 export function mapAct(a: Act) {
@@ -44,6 +44,9 @@ export function mapAct(a: Act) {
     sport_type: a.sport_type,
     start_local: (a.start_date_local ?? "").replace("Z", ""),
     activity_tags: a.workout_type === 1 ? ["Race"] : [],
-    summary: { distance: a.distance, moving_time: a.moving_time, elapsed_time: a.elapsed_time, relative_effort: a.suffer_score ?? null },
+    summary: {
+      distance: a.distance, moving_time: a.moving_time, elapsed_time: a.elapsed_time, relative_effort: a.suffer_score ?? null,
+      avg_hr: a.average_heartrate ?? null, max_hr: a.max_heartrate ?? null, elev: a.total_elevation_gain ?? null,
+    },
   };
 }
