@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { aiClient, AI_MODEL } from "@/lib/ai";
+import { coachContext } from "@/lib/hub/coachContext";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-/** Appel au coach (Gemini). body: { messages: {role:"user"|"assistant", content}[], json?: boolean } */
+/** Appel au coach (Gemini). body: { messages: {role:"user"|"assistant", content}[], json?: boolean, coach?: { raceId?: string } }
+ *  Avec `coach`, le serveur ajoute tout le contexte (profil, courses, forme, historique Strava 12 mois). */
 export async function POST(req: NextRequest) {
   if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "sampling_disabled" }, { status: 503 });
   const b = await req.json().catch(() => null);
@@ -15,9 +17,11 @@ export async function POST(req: NextRequest) {
     .map((m: { role: "user" | "assistant"; content: string }) => ({ role: m.role, content: m.content.slice(0, 20000) }));
   if (!clean.length) return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   try {
+    const ctx = b?.coach ? await coachContext(typeof b.coach.raceId === "string" ? b.coach.raceId : null) : null;
     const r = await aiClient().chat.completions.create({
       model: AI_MODEL,
       messages: [
+        ...(ctx ? [{ role: "system" as const, content: ctx }] : []),
         { role: "system", content: "Tu es le coach de course à pied de Killian, dans son app Kida. Réponds en français. N'invente aucun chiffre absent des données fournies. Pas de diagnostic médical : en cas de douleur ou de fièvre, conseille un avis médical." + (b?.json ? " Réponds uniquement par un objet JSON valide." : "") },
         ...clean,
       ],

@@ -114,6 +114,8 @@ h3 .x{margin-left:auto;font-size:14.5px;color:var(--dim);font-weight:600;backgro
 .cfacts b{display:block;font-size:15px;font-weight:700;margin-top:3px;line-height:1.25}
 .cfacts span{display:block;font-size:12.5px;font-weight:500;color:#3a3b40;margin-top:3px;line-height:1.35}
 .coachbtn[disabled]{opacity:.5}
+.cknows{font-size:13px;font-weight:500;color:var(--mid);line-height:1.45;margin-top:12px}
+.lnk{border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:2px}
 #cform{position:sticky;bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--card);box-shadow:0 6px 24px rgba(15,16,18,.12);z-index:2}
 .coach .ct{display:flex;align-items:center;gap:12px}
 .coach .ci2{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#b6a4fb,#b9dcf9);display:grid;place-items:center;flex:0 0 46px}
@@ -372,7 +374,7 @@ var mcp={callTool:function(s,t,i){var u=route(s,t,i);if(!u)return Promise.reject
     setTimeout(run,0);var iv=o&&o.refetchInterval?setInterval(run,Math.max(30000,o.refetchInterval)):null;
     return function(){dead=true;if(iv)clearInterval(iv)}}};
 function sample(input,opts){opts=opts||{};var msgs=typeof input==="string"?[{role:"user",content:input}]:input;
-  return API("/api/ai",{method:"POST",body:JSON.stringify({messages:msgs,json:!!opts._json}),signal:opts.signal}).then(function(j){
+  return API("/api/ai",{method:"POST",body:JSON.stringify({messages:msgs,json:!!opts._json,coach:opts.coach||null}),signal:opts.signal}).then(function(j){
     if(opts.onText)opts.onText({text:j.text,delta:j.text});return {text:j.text,truncated:!!j.truncated,modelTierApplied:"default"}},
     function(e){if(e&&e.name==="AbortError")throw {code:"cancelled",message:""};throw {code:(e&&e.code)||"upstream_error",message:""}})}
 sample.json=function(input,opts){return sample(input,Object.assign({},opts,{_json:true,onText:null})).then(function(r){var t=r.text;try{return JSON.parse(t)}catch(e){var m=t.match(/[\{\[][\s\S]*[\}\]]/);if(m){try{return JSON.parse(m[0])}catch(e2){}}throw {code:"invalid_json",text:t}}})};
@@ -635,25 +637,12 @@ function watchWx(r){var w=r.weather||{};if(!S.mcp||!w.locationKey||S.wxOn[r.id]|
 }
 function addDays(s,n){var d=pd(s);d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 
-/* ── coach (Claude) ── */
-function coachCtx(r){var f=(S.me||{}).forme||{},tk=todayKey();
-  var plan=(r.plan||[]).map(function(p){return (p.date===tk?"[AUJOURD'HUI] ":"")+p.date+" : "+p.title+(p.detail?" ("+p.detail+")":"")}).join("\n");
-  var lw=S.wx[r.id]&&S.wx[r.id].day;
-  return "Tu es le coach de course à pied de Killian. Réponds en français, court (6 lignes max), concret, sans inventer de chiffres absents des données. Rappelle un avis médical si douleur ou fièvre.\n\n"+
-    "Aujourd'hui : "+tk+"\nCourse : "+r.name+", "+r.date+(r.time?" à "+r.time:"")+", "+(r.distanceKm||"?")+" km, D+ "+(r.dplus||0)+" m, "+(r.place||"")+
-    "\nStatut : "+(r.status==="done"?"terminée":jx(r.date))+
-    "\nObjectifs : "+(r.goals||[]).map(function(g){return g.k+" "+hms(g.s)}).join(", ")+" (choisi : "+(r.goalSel||"B")+")"+
-    (r.prediction&&r.prediction.s?"\nPrédiction : "+hms(r.prediction.s):"")+
-    (r.result&&r.result.s?"\nRésultat : "+hms(r.result.s)+" "+(r.result.place||""):"")+
-    (lw?"\nMétéo prévue jour J : "+lw.displayTemperature+", vent "+((lw.extended||{}).wind||"?")+", pluie "+lw.precip:(r.weather&&r.weather.temp?"\nMétéo notée : "+r.weather.temp+", "+(r.weather.wind||""):""))+
-    (plan?"\nPlan :\n"+plan:"")+(r.planRule?"\nRègle : "+r.planRule.join(" "):"")+
-    "\nForme ("+(f.asOf||"?")+") : condition "+f.condition+", fatigue "+f.fatigue+", fraîcheur "+f.tsb+(f.alert?". "+f.alert:"")+
-    "\nRepères : seuil ~3:44/km, FC max ~196, zones FC Z2 126-156, Z3 157-172, Z4 173-187. Gêne ischio droit par le passé ; Achille à ménager (pas de sprints)."}
 /* ── COACH (page dédiée) ── */
 function coachRace(){return (S.coachRace&&race(S.coachRace))||upcoming()[0]||null}
 function vCoach(){var r=coachRace(),tk=todayKey(),f=(S.me||{}).forme||{},s=r?(r.plan||[]).filter(function(p){return p.date===tk})[0]:null;
   var up=r&&r.status!=="done"&&days(r.date)>=0;
   var h='<div class="coach cpage"><div class="ct"><span class="ci2">'+BUB+'</span><div><b>Ce que sait ton coach</b><span>'+(r?esc((up?jx(r.date)+" · ":"")+r.name):"Aucune course prévue")+'</span></div></div>'+
+    '<p class="cknows">Tes courses et leurs plans, ta forme, tes records et 12 mois d\'historique Strava. <button class="lnk" data-notes="1">Mes notes pour le coach</button></p>'+
     '<div class="cfacts"><div style="background:'+(s?DCOL[dayType(s,r)]:"var(--rest)")+'"><u>Aujourd\'hui</u><b>'+(s?esc(s.title):"Pas de séance")+'</b>'+(s&&s.detail?'<span>'+esc(s.detail)+'</span>':"")+'</div>'+
     '<div style="background:var(--sky)"><u>Forme</u><b>'+(f.condition!=null?"Condition "+esc(String(f.condition)):"—")+'</b><span>'+[f.fatigue!=null?"fatigue "+f.fatigue:"",f.tsb!=null?"fraîcheur "+f.tsb:""].filter(Boolean).map(esc).join(" · ")+'</span></div></div></div>';
   if(!S.sample)return h+'<div class="empty" style="margin-top:12px">Le coach est indisponible pour le moment.</div>';
@@ -668,13 +657,18 @@ function vCoach(){var r=coachRace(),tk=todayKey(),f=(S.me||{}).forme||{},s=r?(r.
 function askCoach(q,show){if(!S.sample||!q||S.cctl)return;var r=coachRace();S.chat=S.chat||[];
   S.chat.push({role:"user",content:q,show:show});var bot={role:"assistant",content:"Réflexion…",wait:true};S.chat.push(bot);
   var ctl=S.cctl=new AbortController();render();endChat();
-  var ctx=r?coachCtx(r):"Tu es le coach de course à pied de Killian. Réponds en français, court et concret.";
   var turns=S.chat.slice(0,-1).map(function(m){return {role:m.role,content:m.content}});
-  S.sample([{role:"user",content:ctx}].concat(turns),{cache:false,signal:ctl.signal,onText:function(u){bot.wait=false;bot.content=u.text;var el=$("clast");if(el){el.classList.remove("wait");el.textContent=u.text}}})
+  S.sample(turns,{cache:false,signal:ctl.signal,coach:{raceId:r?r.id:null},onText:function(u){bot.wait=false;bot.content=u.text;var el=$("clast");if(el){el.classList.remove("wait");el.textContent=u.text}}})
    .then(function(res){bot.content=res.text+(res.truncated?"\n\n(Réponse coupée : pose une question plus précise.)":"")})
    .catch(function(e){var c=e&&e.code;
      bot.content=c==="cancelled"?(e.text||"Arrêté."):c==="rate_limited"?"Trop de questions d'un coup : réessaie dans quelques minutes.":c==="sampling_disabled"?"Le coach n'est pas configuré sur le serveur.":(e.text?e.text+"\n\n":"")+"Réponse interrompue. Renvoie ta question."})
    .then(function(){bot.wait=false;if(S.cctl===ctl)S.cctl=null;if(S.view==="coach"){render();endChat()}})}
+function notesSheet(){var L=$("layer");
+  L.innerHTML='<div class="sheet-bg"><div class="sheet"><h2>Notes pour le coach</h2><p class="cknows" style="margin:0 0 10px">Tout ce qu\'il doit savoir en plus des chiffres : contraintes, blessures, habitudes, objectifs. Il les lit avant chaque réponse.</p><label class="fld"><span>Tes notes</span><textarea id="cnotes" rows="12" placeholder="Chargement…" disabled></textarea></label><div class="row2"><button type="button" class="btn soft" id="ncl">Fermer</button><button type="button" class="btn" id="nok" disabled>Enregistrer</button></div></div></div>';
+  var close=function(){L.innerHTML=""};$("ncl").onclick=close;L.querySelector(".sheet-bg").onclick=function(e){if(e.target===this)close()};
+  KidaAPI("/api/coach-notes").then(function(j){var t=$("cnotes");if(!t)return;t.value=j.notes||"";t.disabled=false;$("nok").disabled=false}).catch(function(){toast("Notes indisponibles");close()});
+  $("nok").onclick=function(){var b=$("nok");b.disabled=true;b.textContent="Enregistrement…";
+    KidaAPI("/api/coach-notes",{method:"PUT",body:JSON.stringify({notes:$("cnotes").value})}).then(function(){toast("Notes enregistrées");close()}).catch(function(){b.disabled=false;b.textContent="Enregistrer";toast("Échec, réessaie")})}}
 function endChat(){var el=$("cform");if(el)el.scrollIntoView({block:"end",behavior:"smooth"})}
 function lastRun(){if(!S.mcp||S.cctl)return;var b=document.querySelector("[data-lastrun] b");if(b)b.textContent="Lecture de Strava…";
   S.mcp.callTool("Strava","list_activities",{first:5}).then(function(res){var p=pl(res),A=(p&&p.activities)||[];
@@ -830,6 +824,7 @@ function bind(){
   document.querySelectorAll("[data-coach]").forEach(function(b){b.onclick=function(){var id=S.raceId;go("coach");S.coachRace=id;render()}});
   document.querySelectorAll("[data-cq]").forEach(function(b){b.onclick=function(){askCoach(b.dataset.cq)}});
   document.querySelectorAll("[data-lastrun]").forEach(function(b){b.onclick=lastRun});
+  document.querySelectorAll("[data-notes]").forEach(function(b){b.onclick=notesSheet});
   var cf=$("cform");if(cf)cf.onsubmit=function(e){e.preventDefault();if(S.cctl){S.cctl.abort();return}var q=$("cq").value.trim();if(q)askCoach(q)};
   document.querySelectorAll("[data-day]").forEach(function(b){b.onclick=function(){S.dayIdx=+b.dataset.day;render()}});
   document.querySelectorAll("[data-dayd]").forEach(function(b){b.onclick=function(){var n=upcoming()[0];(n.plan||[]).forEach(function(q,i){if(q.date===b.dataset.dayd)S.dayIdx=i});render();scrollTo({top:0,behavior:"smooth"})}});
