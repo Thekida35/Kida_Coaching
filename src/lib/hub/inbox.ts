@@ -20,3 +20,9 @@ export async function getInbox() {
 export async function markInboxSeen() {
   await kvSet("inbox_seen", Date.now());
 }
+
+/** Supprime une notification, ou toutes si aucun id. */
+export async function deleteInbox(id?: string) {
+  const list = (await kvGet<InboxItem[]>(KEY)) ?? [];
+  await kvSet(KEY, id ? list.filter((i) => i.id !== id) : []);
+}
