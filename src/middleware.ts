@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { COOKIE, checkToken } from "@/lib/hub/auth";
 
-const OPEN = [/^\/login$/, /^\/api\/login$/, /^\/manifest\.webmanifest$/, /^\/icons\//, /^\/apple-touch-icon(-precomposed)?\.png$/, /^\/sw\.js$/, /^\/api\/cron\//, /^\/api\/strava\/callback$/, /^\/api\/admin\//, /^\/api\/import\//, /^\/login\.html$/];
+const OPEN = [/^\/login$/, /^\/api\/login$/, /^\/manifest\.webmanifest$/, /^\/icons\//, /^\/apple-touch-icon(-precomposed)?\.png$/, /^\/sw\.js$/, /^\/api\/cron\//, /^\/api\/strava\/callback$/, /^\/login\.html$/];
 
 export async function middleware(req: NextRequest) {
   const p = req.nextUrl.pathname;

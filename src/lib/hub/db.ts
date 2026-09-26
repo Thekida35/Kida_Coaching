@@ -7,16 +7,21 @@ if (process.env.NODE_ENV !== "production") g.__prisma = prisma;
 
 type Json = Record<string, unknown>;
 
+let seeded = false; // une fois vérifié, on ne recompte plus à chaque requête (instance chaude)
+
 /** Au premier lancement, la base est remplie avec les données du hub. */
 export async function ensureSeed() {
+  if (seeded) return;
   const n = await prisma.hubDoc.count();
-  if (n > 0) return;
+  seeded = n > 0;
+  if (seeded) return;
   const s = seed as unknown as { races: Record<string, Json>; me: Json };
   const rows = [
     ...Object.entries(s.races).map(([id, data]) => ({ path: `races/${id}`, coll: "races", data: data as Prisma.InputJsonValue })),
     { path: "profile/me", coll: "profile", data: s.me as Prisma.InputJsonValue },
   ];
   await prisma.hubDoc.createMany({ data: rows, skipDuplicates: true });
+  seeded = true;
 }
 
 export async function readStore() {
