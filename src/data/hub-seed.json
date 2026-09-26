@@ -1,0 +1,604 @@
+{
+ "races": {
+  "trail-perros-guirec-2026": {
+   "checks": {},
+   "date": "2026-05-31",
+   "distanceKm": 10,
+   "dplus": 191,
+   "name": "Trail de Perros-Guirec · La Roz'Lyne",
+   "place": "Perros-Guirec",
+   "priority": "C",
+   "result": {
+    "place": "",
+    "s": 3242,
+    "strava": "Petit pace du dimanche 🏃🏻‍♂️"
+   },
+   "status": "done"
+  },
+  "cross-regimentaire-2025": {
+   "checks": {},
+   "date": "2025-12-17",
+   "distanceKm": 10.46,
+   "dplus": 119,
+   "name": "Cross régimentaire du 11",
+   "place": "Gosné",
+   "priority": "B",
+   "result": {
+    "place": "2e",
+    "s": 2544,
+    "strava": "Belle 2e place 🥈 avec un parcours plutôt compliqué\n(une petite chute en prime)"
+   },
+   "status": "done"
+  },
+  "ccpm-2026": {
+   "checks": {},
+   "date": "2026-05-27",
+   "distanceKm": 2.33,
+   "dplus": 11,
+   "name": "CCPM",
+   "place": "Saint-Aubin-du-Cormier",
+   "priority": "C",
+   "result": {
+    "place": "",
+    "s": 471,
+    "strava": "7’51 au chrono ⏱️"
+   },
+   "status": "done"
+  },
+  "marathon-espace-2026": {
+   "checks": {},
+   "date": "2026-03-29",
+   "distanceKm": 42.2,
+   "dplus": 33,
+   "name": "Marathon de l'Espace",
+   "place": "Kourou",
+   "priority": "A",
+   "result": {
+    "place": "11e",
+    "s": 11136,
+    "strava": "11e, si proche du Top 10 🥹\nPlutôt content de mon temps malgré des conditions un peu compliquées."
+   },
+   "status": "done"
+  },
+  "tout-rennes-court-2026": {
+   "bag": [
+    "Dossard épinglé, 4 épingles",
+    "Alphafly 3 + chaussettes déjà portées en course",
+    "Tenue de course, casquette si soleil",
+    "Montre chargée + ceinture cardio",
+    "Caféine 125 mg",
+    "En-cas pour la voiture + bouteille 500 ml",
+    "Sac poubelle ou vieux pull pour le SAS",
+    "Vaseline anti-frottements",
+    "Tenue sèche + veste pour après",
+    "Récup : 60–80 g de glucides + 25 g de protéines",
+    "Clés, téléphone, appli de parking"
+   ],
+   "checks": {
+    "tap": {
+     "0": true
+    }
+   },
+   "course": {
+    "exactKm": 9.98,
+    "finish": "Cours des Alliés",
+    "sas": "SAS 1",
+    "start": "Bd de la Liberté",
+    "warn": [
+     "Dossard le samedi 3 au village.",
+     "Aucun retrait le dimanche. QR code et pièce d'identité."
+    ]
+   },
+   "date": "2026-10-04",
+   "day": [
+    {
+     "h": "07:45",
+     "small": "Un grand verre d'eau, pas de pesée.",
+     "w": "Lever"
+    },
+    {
+     "h": "08:30",
+     "small": "100–125 g de glucides, déjà testés",
+     "w": "Petit-déjeuner"
+    },
+    {
+     "h": "10:00",
+     "w": "Dernier solide"
+    },
+    {
+     "h": "10:15",
+     "small": "~30 min, plus la marge parking",
+     "w": "Départ de Saint-Aubin en voiture"
+    },
+    {
+     "h": "10:45",
+     "small": "Marche tranquille jusqu'au départ",
+     "w": "Garé hors du périmètre fermé"
+    },
+    {
+     "h": "11:00",
+     "key": true,
+     "w": "Caféine 125 mg + 200 ml"
+    },
+    {
+     "h": "11:10",
+     "w": "Toilettes, avant la file"
+    },
+    {
+     "h": "11:15",
+     "small": "12′ footing · 5′ gammes · 3 × 80 m à allure course",
+     "w": "Échauffement 25′"
+    },
+    {
+     "h": "11:30",
+     "w": "Fin de l'hydratation"
+    },
+    {
+     "h": "11:45",
+     "small": "Vêtement jetable sur le dos jusqu'au coup de pistolet",
+     "w": "Dans le SAS 1"
+    },
+    {
+     "h": "12:00",
+     "key": true,
+     "w": "Départ"
+    }
+   ],
+   "dayInfo": [
+    {
+     "l": "Caféine · 2 mg/kg",
+     "v": "125 mg à 11:00, zéro les 3 jours avant"
+    },
+    {
+     "l": "Pendant la course",
+     "v": "rien"
+    },
+    {
+     "l": "Après la ligne",
+     "v": "60–80 g glucides + 25 g protéines"
+    }
+   ],
+   "dayNote": [
+    "Rien de nouveau le jour J.",
+    "Chaque aliment, chaque boisson et chaque gel doit avoir été testé à l'entraînement."
+   ],
+   "dayWarn": [
+    "À vérifier cette semaine",
+    "sur le site ou le mail de l'organisation : le plan de circulation et l'heure de fermeture du SAS."
+   ],
+   "distanceKm": 10,
+   "dplus": 64,
+   "eve": [
+    {
+     "h": "Matin",
+     "w": "20′ facile + 3 × 80 m"
+    },
+    {
+     "h": "Midi",
+     "w": "Repas riche en glucides"
+    },
+    {
+     "h": "Après-midi",
+     "key": true,
+     "small": "QR code + pièce d'identité",
+     "w": "Retrait du dossard au village"
+    },
+    {
+     "h": "19:00",
+     "small": "Glucides, peu de fibres, rien de nouveau",
+     "w": "Dîner tôt"
+    },
+    {
+     "h": "Soir",
+     "w": "Sac prêt, dossard épinglé, montre en charge"
+    },
+    {
+     "h": "22:30",
+     "w": "Coucher"
+    }
+   ],
+   "gear": [
+    {
+     "n": "Nike Alphafly 3",
+     "tone": "g",
+     "u": "154 km · 29 sept + jour J"
+    },
+    {
+     "n": "Adizero Evo SL EXO",
+     "u": "lignes droites"
+    },
+    {
+     "n": "New Balance Hierro V9",
+     "u": "footings faciles"
+    },
+    {
+     "n": "Nike Vomero 18",
+     "tone": "a",
+     "u": "écartées jusqu'au 4 oct"
+    }
+   ],
+   "goalSel": "B",
+   "goals": [
+    {
+     "k": "A",
+     "s": 2205
+    },
+    {
+     "k": "B",
+     "s": 2220
+    },
+    {
+     "k": "C",
+     "s": 2250
+    }
+   ],
+   "name": "Tout Rennes Court",
+   "place": "Rennes",
+   "plan": [
+    {
+     "chip": "⛅ 23°",
+     "date": "2026-09-26",
+     "detail": "Postures variées, se lever souvent, hydratation",
+     "title": "Garde, pas de course",
+     "why": "Charge invisible : elle n'apparaîtra dans aucune de tes métriques.",
+     "wx": {
+      "r": "7 %",
+      "t": "23°",
+      "w": "9"
+     }
+    },
+    {
+     "chip": "🌧 23°",
+     "date": "2026-09-27",
+     "detail": "Sortie de garde",
+     "title": "Repos",
+     "why": "Crois tes jambes, pas l'écran.",
+     "wx": {
+      "r": "68 %",
+      "t": "23°",
+      "w": "15"
+     }
+    },
+    {
+     "chip": "🌧 21°",
+     "date": "2026-09-28",
+     "detail": "Le soir · FC sous 140 · Hierro V9 · 4 lignes droites souples à la fin",
+     "title": "Footing 30′ très facile",
+     "why": "Juste délier les jambes : le 3×2000 est demain à 8 h. Si tu te sens lourd, coupe à 20′.",
+     "wx": {
+      "r": "75 %",
+      "t": "21°",
+      "w": "13"
+     }
+    },
+    {
+     "chip": "🌧 28°",
+     "date": "2026-09-29",
+     "detail": "@ 3:42/km · r 2′ · 8 h · Alphafly · test caféine 7 h · séance sur ta Garmin",
+     "title": "Spécifique 3 × 2000 m",
+     "why": "La séance à protéger. Sors avant 9 h : l'après-midi monte à 28 °C avec des rafales à 52 km/h. Plat, seul.",
+     "wx": {
+      "r": "63 %",
+      "t": "28°",
+      "w": "20"
+     }
+    },
+    {
+     "chip": "⛅ 23°",
+     "date": "2026-09-30",
+     "detail": "Jambes en l'air, sommeil",
+     "title": "Repos complet",
+     "why": "La séance d'hier s'assimile aujourd'hui.",
+     "wx": {
+      "r": "25 %",
+      "t": "23°",
+      "w": "17"
+     }
+    },
+    {
+     "chip": "⛅ 22°",
+     "date": "2026-10-01",
+     "detail": "Facile · 4 × 80 m progressives · Adizero",
+     "title": "30′ + 4 lignes droites",
+     "why": "Juste réveiller les jambes.",
+     "wx": {
+      "r": "60 %",
+      "t": "22°",
+      "w": "11"
+     }
+    },
+    {
+     "chip": "⛅ 23°",
+     "date": "2026-10-02",
+     "detail": "Hydratation · coucher tôt",
+     "title": "Repos",
+     "why": "La nuit qui compte, c'est celle-ci.",
+     "wx": {
+      "r": "1 %",
+      "t": "23°",
+      "w": "7"
+     }
+    },
+    {
+     "chip": "⛅ 21°",
+     "date": "2026-10-03",
+     "detail": "Le matin · puis retrait du dossard au village",
+     "title": "20′ + 3 × 80 m",
+     "why": "Dîner tôt, glucides, peu de fibres.",
+     "wx": {
+      "r": "25 %",
+      "t": "21°",
+      "w": "11"
+     }
+    },
+    {
+     "chip": "⛅ 20°",
+     "date": "2026-10-04",
+     "detail": "10 km · 12h00 · SAS 1 · Alphafly",
+     "title": "Tout Rennes Court",
+     "why": "Pars à 3:44-3:46, ne passe pas sous 3:38 au premier kilomètre.",
+     "wx": {
+      "r": "55 %",
+      "t": "20°",
+      "w": "9"
+     }
+    }
+   ],
+   "planNote": "On coupe le volume, jamais l'intensité. Le rhume a pris le 3×2000 du 24 : il passe mardi 29 à 8 h, avant la chaleur. C'est ton unique test en Alphafly.",
+   "planRule": [
+    "Règle du mardi matin.",
+    "FC repos ≤ 47, nez seulement : 3×2000 complet. Entre 48 et 50 : 2×2000. Au-dessus de 50, fièvre ou toux : 5×400 @3:42 seulement."
+   ],
+   "prediction": {
+    "s": 2235,
+    "src": "Garmin"
+   },
+   "priority": "A",
+   "racePlan": [
+    {
+     "km": "Km 1",
+     "seg": "start",
+     "tag": "FC ≤ 172",
+     "text": "Laisse partir la meute. Trouve ta place, respire. Jamais sous 3:38."
+    },
+    {
+     "km": "Km 2–5",
+     "seg": "mid",
+     "tag": "allure cible",
+     "text": "Régulier. Accroche un groupe à ton allure et reste derrière lui face au vent."
+    },
+    {
+     "km": "Km 6–8",
+     "seg": "mid",
+     "tag": "FC 178–180",
+     "text": "Le moment dur. Ne regarde que le kilomètre en cours. Relâche épaules et mains."
+    },
+    {
+     "km": "Km 9–10",
+     "seg": "end",
+     "tag": "si FC < 182",
+     "text": "Tu vides. Relance à chaque virage, dernier kilomètre à l'envie."
+    }
+   ],
+   "racePlanNote": "FC cible 176 à 180. Le pavé du centre casse le rythme : cours à l'effort et laisse filer 2-3 secondes, tu les reprends sur le bitume.",
+   "sessions": [
+    {
+     "d": "3 × 2000 m @ 3:42 · r 2′",
+     "t": "Spécifique 10 km",
+     "w": "Allure de course. Le 29 septembre, en Alphafly."
+    },
+    {
+     "d": "5 × 1′ @ 3:40 · r 2′",
+     "t": "Rappel d'allure",
+     "w": "Touche l'allure sans fatigue."
+    },
+    {
+     "d": "40–70′ · FC sous 150",
+     "t": "Footing zone 2",
+     "w": "Cadence 182. Vraiment facile."
+    }
+   ],
+   "status": "upcoming",
+   "time": "12:00",
+   "weather": {
+    "locationKey": "48.112,-1.665",
+    "note": "Prévision de départ du 26 septembre, à huit jours : elle va bouger. À 20 °C, un 10 km coûte environ 10 à 15 secondes par rapport aux 10-12 °C idéaux. B (37:00) si 17 °C ou plus au départ ; A seulement sous 15 °C sans vent.",
+    "sky": "soleil partiel · averses 55 %",
+    "temp": "20° max",
+    "wind": "9 km/h ouest · rafales 26"
+   }
+  },
+  "ultra-marin-arvor-2026": {
+   "checks": {},
+   "date": "2026-06-27",
+   "distanceKm": 59.2,
+   "dplus": 566,
+   "name": "Ultra Marin Arvor",
+   "place": "Auray",
+   "priority": "A",
+   "result": {
+    "place": "",
+    "s": 18200,
+    "strava": "Une bonne chose de faite on a vu pire pour une première ✅\nDe la pluie, du soleil, pas mal de chaleur, une petite erreur de parcours pour une petite échappée.\nMais je suis très satisfait malgré la douleur et l'ischio et autres, le corps a tenu."
+   },
+   "status": "done"
+  }
+ },
+ "me": {
+  "firstName": "Killian",
+  "forme": {
+   "alert": "Condition −1, fatigue −8, forme de −7 à −2 : c'est l'affûtage qui fait son travail. FC de nuit 48, HRV 72 ms, température et respiration dans ta plage : le rhume est passé.",
+   "asOf": "2026-09-26",
+   "condition": 27,
+   "conditionNote": "−1 en 5 jours · normal en affûtage",
+   "easyHr": "152",
+   "easyLabel": "FC à 4:54/km",
+   "easyNote": "+5 vs 17 sept · rhume",
+   "fatigue": 29,
+   "fatigueNote": "en baisse (37 le 21)",
+   "last7": [
+    {
+     "d": "25 sept",
+     "e": 57,
+     "hr": 152,
+     "n": "Footing, fin de rhume",
+     "p": "4:54"
+    },
+    {
+     "d": "24 sept",
+     "e": 12,
+     "hr": 133,
+     "n": "Récup",
+     "p": "5:48"
+    },
+    {
+     "d": "22 sept",
+     "e": 79,
+     "hr": 158,
+     "n": "Bloc 5×1′",
+     "p": "4:42"
+    },
+    {
+     "d": "21 sept",
+     "e": 21,
+     "hr": 133,
+     "n": "Régimentaire",
+     "p": "5:44"
+    },
+    {
+     "d": "19 sept",
+     "e": 159,
+     "hr": 161,
+     "n": "Long + 2×8′",
+     "p": "4:35"
+    },
+    {
+     "d": "17 sept",
+     "e": 70,
+     "hr": 147,
+     "n": "Endurance",
+     "p": "4:54"
+    },
+    {
+     "d": "16 sept",
+     "e": 9,
+     "hr": 123,
+     "n": "Récup groupe",
+     "p": "6:09"
+    }
+   ],
+   "predSrc": "Garmin",
+   "predictions": [
+    {
+     "k": "5 km",
+     "km": 5,
+     "s": 1055
+    },
+    {
+     "k": "10 km",
+     "km": 10,
+     "s": 2235
+    },
+    {
+     "k": "Semi",
+     "km": 21.0975,
+     "s": 5013
+    },
+    {
+     "k": "Marathon",
+     "km": 42.195,
+     "s": 11091
+    }
+   ],
+   "signals": [
+    {
+     "l": "VO2max",
+     "u": "top 1 % de ton âge",
+     "v": "61"
+    },
+    {
+     "l": "Charge aiguë",
+     "u": "optimale",
+     "v": "770"
+    },
+    {
+     "l": "HRV / FC nuit",
+     "u": "/ 48 · plage 66-86",
+     "v": "72"
+    },
+    {
+     "l": "FC repos 26 sept",
+     "u": "feu vert",
+     "v": "≤ 47"
+    },
+    {
+     "l": "Volume 30 jours",
+     "u": "km · 23 sorties",
+     "v": "208"
+    }
+   ],
+   "threshold": [
+    {
+     "d": "31/08",
+     "s": 233
+    },
+    {
+     "d": "2/09",
+     "s": 224
+    },
+    {
+     "d": "8/09",
+     "s": 227
+    },
+    {
+     "d": "13/09",
+     "s": 216
+    },
+    {
+     "d": "15/09",
+     "s": 224
+    },
+    {
+     "d": "19/09",
+     "s": 224
+    }
+   ],
+   "thresholdNote": "De 3:53 à 3:36 en treize jours. Le 19 septembre : 2×8′ à 3:44 sur terrain accidenté après 25 min de course, soit environ 3:40 sur plat. Seuil lactique à 179.",
+   "tsb": "−2",
+   "tsbNote": "remonte vers +5"
+  },
+  "records": [
+   {
+    "k": "5 km",
+    "km": 5,
+    "s": 1123,
+    "when": "2 juin 2026 · en séance"
+   },
+   {
+    "k": "10 km",
+    "km": 10,
+    "s": 2364,
+    "when": "9 juin 2026 · en séance"
+   },
+   {
+    "k": "Semi-marathon",
+    "km": 21.0975,
+    "label": "1h25",
+    "s": 5100,
+    "when": "déclaré · pas sur Strava"
+   },
+   {
+    "k": "Marathon",
+    "km": 42.195,
+    "s": 11136,
+    "when": "29 mars 2026"
+   },
+   {
+    "k": "Ultra 60 km",
+    "km": 59.19,
+    "s": 18200,
+    "when": "27 juin 2026"
+   }
+  ]
+ }
+}
