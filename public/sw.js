@@ -1,5 +1,5 @@
 /* Kida — service worker : ouverture instantanée (cache de l'app) et notifications du brief. */
-const VERSION = "kida-v4";
+const VERSION = "kida-v5";
 const STATIC = /^\/(icons\/|apple-touch-icon|manifest\.webmanifest)/;
 
 self.addEventListener("install", () => self.skipWaiting());

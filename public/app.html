@@ -130,7 +130,8 @@ h3 .x{margin-left:auto;font-size:14.5px;color:var(--dim);font-weight:600;backgro
 .chatempty{text-align:center;padding:12vh 20px 8vh;color:var(--mid);font-weight:500;line-height:1.45}
 .chatempty img{width:76px;height:76px;border-radius:50%;display:block;margin:0 auto 14px}
 .chatempty b{display:block;font-size:20px;color:var(--ink);margin-bottom:4px}
-.chat.full{margin:12px 0 0;padding-bottom:96px}
+.chat.full{margin:12px 0 0;padding-bottom:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+body.chatmode{overflow:hidden}
 .chatempty+#cform,.chat.full+#cform,.chatbar~#cform{position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:438px;bottom:calc(96px + env(safe-area-inset-bottom,0px));margin:0}
 .msg.bot.md{white-space:normal;max-width:100%}
 .md p{margin:0 0 8px}.md>:last-child{margin-bottom:0}
@@ -272,7 +273,7 @@ td+td,th+th{padding-left:14px}
 .fld input,.fld select,.fld textarea{width:100%;background:var(--card);border:1.5px solid transparent;border-radius:18px;padding:13px 15px;font-weight:600;font-size:16px;outline:none}
 .fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--lav)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.toast{position:fixed;left:50%;top:calc(14px + var(--sat,env(safe-area-inset-top,0px)));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-weight:600;font-size:14px;z-index:90;box-shadow:var(--navsh)}
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-weight:600;font-size:14px;z-index:90;box-shadow:var(--navsh)}
 .err{color:var(--red);font-size:13.5px;font-weight:600;margin:4px 6px 0}
 
 .coachbtn{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;background:var(--card);border:0;border-radius:26px;padding:12px 14px;text-align:left}
@@ -336,12 +337,7 @@ nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stro
 :focus-visible{outline:2px solid var(--vio);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
-<style>.app{padding-top:var(--sat,env(safe-area-inset-top,0px));box-sizing:border-box}
-/* bande opaque sous l'heure et la batterie : le contenu qui défile ne passe pas dessous */
-body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--sat,env(safe-area-inset-top,0px));background:var(--bg);z-index:40}</style>
-<script>(function(){var p=document.createElement("div");p.style.cssText="position:fixed;top:0;height:env(safe-area-inset-top,0px)";document.documentElement.appendChild(p);var h=p.offsetHeight;p.remove();
-  var sa=navigator.standalone===true||matchMedia("(display-mode: standalone)").matches;if(!h&&sa)h=screen.height>=852?54:screen.height>=812?47:20;
-  document.documentElement.style.setProperty("--sat",h+"px")})();</script>
+<style>.app{padding-top:env(safe-area-inset-top,0px);box-sizing:border-box}</style>
 </head><body>
 
 
@@ -410,6 +406,7 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch
 var K="kidahub:";
 function save(k,v){try{localStorage.setItem(K+k,v)}catch(e){}}
 function load(k){try{return localStorage.getItem(K+k)}catch(e){return null}}
+addEventListener("resize",fitChat);if(window.visualViewport)visualViewport.addEventListener("resize",fitChat);
 document.getElementById("bell").onclick=inboxSheet;document.getElementById("me").onclick=settingsSheet;
 setTimeout(refreshDot,300);document.addEventListener("visibilitychange",function(){if(!document.hidden)refreshDot()});
 if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",function(e){if(e.data&&e.data.type==="push")refreshDot()});
@@ -445,7 +442,7 @@ var RUN='<svg viewBox="0 0 24 24"><circle cx="15" cy="4" r="1.6"/><path d="M8.5 
 function go(v,id,tab){if(v==="coach"){S.coachRace=null;loadChat()}S.view=v;if(id!==undefined)S.raceId=id;S.tab=tab||null;
   document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.v===(v==="race"?"races":v))});
   render();
-  if(v==="coach")chatBottom();else scrollTo(0,0)}
+  scrollTo(0,0);if(v==="coach")chatBottom()}
 document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){go(b.dataset.v)}});
 
 function render(){
@@ -457,6 +454,7 @@ function render(){
   $("hsub").textContent=nx?jx(nx.date)+" · "+nx.name:"Aucune course prévue";
   m.innerHTML=S.view==="races"?vRaces():S.view==="forme"?vForme():S.view==="race"?vRace():S.view==="coach"?vCoach():vHome();
   bind();
+  document.body.classList.toggle("chatmode",S.view==="coach");if(S.view==="coach")fitChat();
 }
 
 /* ── ACCUEIL ── */
@@ -669,8 +667,11 @@ var ICO_SEND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 var ICO_STOP='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>';
 function loadChat(){if(S.chat)return;S.chat=[];
   KidaAPI("/api/coach/chat").then(function(j){if(!S.cctl)S.chat=j.messages||[];if(S.view==="coach"){render();chatBottom()}}).catch(function(){})}
-function chatBottom(){if(!(S.chat&&S.chat.length))return;requestAnimationFrame(function(){scrollTo(0,document.documentElement.scrollHeight)})}
-function nearBottom(){return innerHeight+scrollY>document.documentElement.scrollHeight-160}
+function chatBox(){return document.querySelector(".chat.full")}
+/* La zone des messages occupe l'espace entre l'en-tête et la saisie : c'est elle qui défile, pas la page. */
+function fitChat(){var c=chatBox(),f=$("cform");if(!c||!f)return;c.style.height=Math.max(120,f.getBoundingClientRect().top-c.getBoundingClientRect().top-10)+"px"}
+function chatBottom(){requestAnimationFrame(function(){var c=chatBox();if(c)c.scrollTop=c.scrollHeight})}
+function nearBottom(){var c=chatBox();return !c||c.scrollHeight-c.scrollTop-c.clientHeight<160}
 /* Markdown minimal et sûr : le texte est échappé avant toute mise en forme. */
 function mdInline(t){return t.replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>")
   .replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g,"$1<i>$2</i>").replace(/(^|[^\w])_([^_\n]+)_(?!\w)/g,"$1<i>$2</i>")
@@ -892,7 +893,7 @@ function bind(){
   document.querySelectorAll("[data-notes]").forEach(function(b){b.onclick=notesSheet});
   document.querySelectorAll("[data-newchat]").forEach(function(b){b.onclick=newChat});
   var cf=$("cform");if(cf){var cq=$("cq"),grow=function(){cq.style.height="auto";cq.style.height=Math.min(cq.scrollHeight,140)+"px"};
-    cq.value=S.draft||"";grow();cq.oninput=function(){S.draft=cq.value;grow()};
+    cq.value=S.draft||"";grow();cq.oninput=function(){S.draft=cq.value;grow();fitChat()};
     cf.onsubmit=function(e){e.preventDefault();if(S.cctl){S.cctl.abort();return}var q=cq.value.trim();if(q){S.draft="";askCoach(q)}}}
   document.querySelectorAll("[data-day]").forEach(function(b){b.onclick=function(){S.dayIdx=+b.dataset.day;render()}});
   document.querySelectorAll("[data-dayd]").forEach(function(b){b.onclick=function(){var n=upcoming()[0];(n.plan||[]).forEach(function(q,i){if(q.date===b.dataset.dayd)S.dayIdx=i});render();scrollTo({top:0,behavior:"smooth"})}});
