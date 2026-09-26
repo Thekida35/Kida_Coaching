@@ -1,4 +1,4 @@
-import { readStore, kvGet, kvSet, prisma } from "@/lib/hub/db";
+import { readStore, kvGet, kvSet } from "@/lib/hub/db";
 import { api, NotConnected } from "@/lib/hub/strava";
 
 /** Profil de départ du coach : ce qu'on sait de Killian en dehors des chiffres. Modifiable depuis l'onglet Coach. */
@@ -120,19 +120,6 @@ async function stravaHistory(): Promise<string> {
   return text;
 }
 
-/** Données de l'ancien tableau (import Garmin) si présentes : métriques des 21 derniers jours. */
-async function garminMetrics(): Promise<string> {
-  try {
-    const rows = await prisma.dailyMetric.findMany({ where: { date: { gte: new Date(Date.now() - 21 * DAY) } }, orderBy: { date: "asc" } });
-    if (!rows.length) return "";
-    return "MÉTRIQUES QUOTIDIENNES (import Garmin) :\n" + rows.map((r) =>
-      [r.date.toISOString().slice(0, 10), r.ctl != null && `CTL ${r.ctl.toFixed(0)}`, r.atl != null && `ATL ${r.atl.toFixed(0)}`, r.tsb != null && `TSB ${r.tsb.toFixed(0)}`,
-        r.hrv != null && `HRV ${r.hrv}`, r.restHr != null && `FC repos ${r.restHr}`, r.sleepScore != null && `sommeil ${r.sleepScore}`].filter(Boolean).join(" · ")).join("\n");
-  } catch {
-    return "";
-  }
-}
-
 type Race = Record<string, unknown> & { id: string; name: string; date: string; status?: string; distanceKm?: number; dplus?: number; place?: string; result?: { s?: number; place?: string; strava?: string } };
 
 /** Contexte complet envoyé au coach avant la conversation. */
@@ -160,17 +147,15 @@ export async function coachContext(raceId?: string | null) {
   } catch (e) {
     strava = e instanceof NotConnected ? "(Strava non connecté : pas d'historique disponible.)" : "(Historique Strava momentanément indisponible.)";
   }
-  const garmin = await garminMetrics();
 
   return [
     `Tu es le coach de course à pied personnel de Killian, dans son app Kida. Nous sommes le ${parisDate()} (${today}).`,
-    `Règles : réponds en français, en tutoyant, court (8 lignes max sauf si on te demande une analyse détaillée), concret, avec des allures et des FC quand c'est utile. Appuie-toi sur les données ci-dessous et cite-les. N'invente aucun chiffre absent. Si une info manque, dis-le ou pose une question. Pas de diagnostic médical : douleur, fièvre ou symptôme inhabituel → avis médical.`,
+    `Règles : réponds en français, en tutoyant, concret, avec des allures et des FC quand c'est utile. Longueur proportionnée : quelques lignes pour une question simple ; pour une analyse de séance, VERDICT en tête puis le détail. Tu peux utiliser du Markdown (### titres, **gras**, listes, tableaux) quand ça aide la lecture. Appuie-toi sur les données ci-dessous et cite-les. N'invente aucun chiffre absent. Si une info manque, dis-le ou pose une question. Pas de diagnostic médical : douleur, fièvre ou symptôme inhabituel → avis médical.`,
     `\n=== PROFIL ET NOTES DE KILLIAN ===\n${notes}`,
     focus ? `\n=== COURSE EN FOCUS : ${focus.name} (${focus.date}) — fiche complète (JSON) ===\n${JSON.stringify(strip(focus))}` : "",
     upcoming.filter((r) => r !== focus).length ? `\n=== AUTRES COURSES À VENIR ===\n${upcoming.filter((r) => r !== focus).map((r) => `${r.date} · ${r.name} · ${r.distanceKm ?? "?"} km`).join("\n")}` : "",
     pastLines.length ? `\n=== COURSES PASSÉES ===\n${pastLines.join("\n")}` : "",
     me ? `\n=== FORME, RECORDS ET PRÉDICTIONS (JSON, relevés Garmin / intervals.icu) ===\n${JSON.stringify(me)}` : "",
     `\n=== HISTORIQUE STRAVA ===\n${strava}`,
-    garmin ? `\n=== ${garmin}` : "",
   ].filter(Boolean).join("\n").slice(0, 120000);
 }

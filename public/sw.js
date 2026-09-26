@@ -1,11 +1,62 @@
-/* Kida — service worker : notifications du brief du matin. */
+/* Kida — service worker : ouverture instantanée (cache de l'app) et notifications du brief. */
+const VERSION = "kida-v3";
+const STATIC = /^\/(icons\/|apple-touch-icon|manifest\.webmanifest)/;
+
 self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
+self.addEventListener("activate", (e) =>
+  e.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k)))).then(() => self.clients.claim()),
+  ),
+);
+
+self.addEventListener("fetch", (e) => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url);
+
+  // L'app : affichée depuis le cache tout de suite, mise à jour en arrière-plan pour la prochaine ouverture.
+  if (req.mode === "navigate" && url.origin === location.origin && url.pathname === "/") {
+    e.respondWith(
+      caches.open(VERSION).then(async (c) => {
+        const cached = await c.match("/");
+        const fresh = fetch(req)
+          .then((res) => {
+            if (res.ok && !res.redirected) c.put("/", res.clone());
+            return res;
+          })
+          .catch(() => cached);
+        if (cached) {
+          e.waitUntil(fresh);
+          return cached;
+        }
+        return fresh;
+      }),
+    );
+    return;
+  }
+
+  // Icônes, manifeste et polices : cache d'abord (ils ne changent qu'avec un nouveau ?v=).
+  const isFont = url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com";
+  if (isFont || (url.origin === location.origin && STATIC.test(url.pathname))) {
+    e.respondWith(
+      caches.open(VERSION).then(async (c) => {
+        const hit = await c.match(req);
+        if (hit) return hit;
+        const res = await fetch(req);
+        if (res.ok || res.type === "opaque") c.put(req, res.clone());
+        return res;
+      }),
+    );
+  }
+  // Tout le reste (API) passe directement par le réseau.
+});
+
 self.addEventListener("push", (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
   e.waitUntil(self.registration.showNotification(d.title || "Kida", { body: d.body || "", icon: "/icons/icon-192.png?v=2", badge: "/icons/icon-192.png?v=2", data: { url: d.url || "/" } }));
 });
+
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();
   const url = (e.notification.data && e.notification.data.url) || "/";

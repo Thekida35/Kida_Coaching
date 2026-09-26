@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typedRoutes: true,
-  // On ignore les erreurs de type/lint au build (elles n'empêchent pas l'app de tourner ;
-  // on corrigera proprement plus tard).
-  typescript: { ignoreBuildErrors: true },
+  // Pas de config ESLint dans le projet : la vérification des types (tsc) suffit au build.
   eslint: { ignoreDuringBuilds: true },
 };
 
