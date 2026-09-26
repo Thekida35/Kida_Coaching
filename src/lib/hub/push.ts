@@ -1,14 +1,19 @@
 import webpush from "web-push";
 import { prisma } from "@/lib/hub/db";
 
+/** Clés VAPID nettoyées : un copier-coller dans Vercel ajoute vite un espace, un retour ligne ou des guillemets. */
+export function vapidKey(name: "VAPID_PUBLIC_KEY" | "VAPID_PRIVATE_KEY") {
+  return (process.env[name] ?? "").replace(/[^A-Za-z0-9_-]/g, "");
+}
+
 export function pushReady() {
-  return !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
+  return !!(vapidKey("VAPID_PUBLIC_KEY") && vapidKey("VAPID_PRIVATE_KEY"));
 }
 
 /** Envoie une notification à tous les appareils abonnés ; retire ceux qui ont expiré. */
 export async function sendAll(payload: { title: string; body: string; url?: string }) {
   if (!pushReady()) return { sent: 0, reason: "vapid_missing" };
-  webpush.setVapidDetails("mailto:kida@kida-coaching.app", process.env.VAPID_PUBLIC_KEY!, process.env.VAPID_PRIVATE_KEY!);
+  webpush.setVapidDetails("mailto:kida@kida-coaching.app", vapidKey("VAPID_PUBLIC_KEY"), vapidKey("VAPID_PRIVATE_KEY"));
   const subs = await prisma.pushSub.findMany();
   let sent = 0;
   await Promise.all(subs.map(async (s) => {
