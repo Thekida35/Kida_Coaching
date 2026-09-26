@@ -319,7 +319,9 @@ nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stro
 :focus-visible{outline:2px solid var(--vio);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
-<style>:root{padding-top:env(safe-area-inset-top,0px)}</style>
+<style>.app{padding-top:env(safe-area-inset-top,0px);box-sizing:border-box}
+/* bande opaque sous l'heure et la batterie : le contenu qui défile ne passe pas dessous */
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:40}</style>
 </head><body>
 
 
@@ -645,7 +647,7 @@ var ICO_SEND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 var ICO_STOP='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>';
 function loadChat(){if(S.chat)return;S.chat=[];
   KidaAPI("/api/coach/chat").then(function(j){if(!S.cctl)S.chat=j.messages||[];if(S.view==="coach"){render();chatBottom()}}).catch(function(){})}
-function chatBottom(){requestAnimationFrame(function(){scrollTo(0,document.documentElement.scrollHeight)})}
+function chatBottom(){if(!(S.chat&&S.chat.length))return;requestAnimationFrame(function(){scrollTo(0,document.documentElement.scrollHeight)})}
 function nearBottom(){return innerHeight+scrollY>document.documentElement.scrollHeight-160}
 /* Markdown minimal et sûr : le texte est échappé avant toute mise en forme. */
 function mdInline(t){return t.replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>")
