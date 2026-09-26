@@ -4,7 +4,7 @@ import { makeToken } from "@/lib/hub/auth";
 
 export async function GET(req: NextRequest) {
   if (!stravaConfigured()) return NextResponse.redirect(new URL("/?strava=config", req.url));
-  const u = new URL("https://www.strava.com/oauth/mobile/authorize");
+  const u = new URL("https://www.strava.com/oauth/authorize");
   u.searchParams.set("client_id", process.env.STRAVA_CLIENT_ID!);
   u.searchParams.set("redirect_uri", new URL("/api/strava/callback", req.url).toString());
   u.searchParams.set("response_type", "code");
