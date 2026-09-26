@@ -54,9 +54,11 @@ button.avw{border:0;cursor:pointer}
 .codef input{border:1.5px solid #e0e0dc;border-radius:14px;padding:12px 14px;font:500 16px Urbanist,sans-serif;background:#fff}
 .inbox{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto}
 .nt{background:var(--card);border-radius:18px;padding:12px 14px}
-.nh{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.nh{display:flex;gap:10px;align-items:baseline}
 .nh b{font-size:15px}
-.nh span{font-size:12px;color:var(--dim);white-space:nowrap}
+.nh span{font-size:12px;color:var(--dim);white-space:nowrap;margin-left:auto}
+[hidden]{display:none!important}
+.nx{border:0;background:var(--soft);width:28px;height:28px;border-radius:50%;font-size:18px;line-height:1;color:var(--mid);flex:0 0 28px;align-self:center}
 .nt p{margin-top:4px;font-size:14px;color:#3a3b40;white-space:pre-line;line-height:1.4}
 .back{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:0;border-radius:999px;padding:10px 16px 10px 12px;font-weight:600;font-size:14px;color:var(--ink);min-height:44px}
 
@@ -874,11 +876,15 @@ async function settingsSheet(){var L=$("layer");
 function ago(t){var s=(Date.now()-t)/1e3;if(s<3600)return "il y a "+Math.max(1,Math.round(s/60))+" min";if(s<86400)return "il y a "+Math.round(s/3600)+" h";var d=new Date(t);return DW[d.getDay()]+" "+d.getDate()+" "+MO[d.getMonth()]}
 function refreshDot(){window.KidaAPI("/api/inbox").then(function(j){S.inbox=j;$("bell").classList.toggle("has",j.unseen>0)}).catch(function(){})}
 function inboxSheet(){var L=$("layer"),draw=function(j){var it=(j&&j.items)||[];
-    return it.length?'<div class="inbox">'+it.map(function(n){return '<div class="nt"><div class="nh"><b>'+esc(n.title)+'</b><span>'+ago(n.t)+'</span></div><p>'+esc(n.body)+'</p></div>'}).join("")+'</div>'
+    return it.length?'<div class="inbox">'+it.map(function(n){return '<div class="nt"><div class="nh"><b>'+esc(n.title)+'</b><span>'+ago(n.t)+'</span><button class="nx" data-del="'+esc(n.id)+'" aria-label="Supprimer">×</button></div><p>'+esc(n.body)+'</p></div>'}).join("")+'</div>'
       :'<div class="empty" style="margin:6px 0 0">Rien pour l\'instant. Ton brief du matin et tes rappels arriveront ici.</div>'};
-  L.innerHTML='<div class="sheet-bg"><div class="sheet"><h2>Notifications</h2><div id="inb">'+draw(S.inbox)+'</div><div class="row2" style="margin-top:12px"><button type="button" class="btn" id="ic" style="grid-column:1/-1">Fermer</button></div></div></div>';
+  L.innerHTML='<div class="sheet-bg"><div class="sheet"><h2>Notifications</h2><div id="inb">'+draw(S.inbox)+'</div><div class="row2" style="margin-top:12px"><button type="button" class="btn soft" id="ia">Tout effacer</button><button type="button" class="btn" id="ic">Fermer</button></div></div></div>';
   $("ic").onclick=function(){L.innerHTML=""};L.querySelector(".sheet-bg").onclick=function(e){if(e.target===this)L.innerHTML=""};
-  window.KidaAPI("/api/inbox").then(function(j){S.inbox=j;var b=$("inb");if(b)b.innerHTML=draw(j);return window.KidaAPI("/api/inbox",{method:"POST"})}).then(function(){$("bell").classList.remove("has");if(S.inbox)S.inbox.unseen=0}).catch(function(){})}
+  var show=function(j){S.inbox=j;var b=$("inb");if(!b)return;b.innerHTML=draw(j);var it=(j&&j.items)||[];$("ia").hidden=!it.length;
+    b.querySelectorAll("[data-del]").forEach(function(x){x.onclick=function(){x.closest(".nt").remove();window.KidaAPI("/api/inbox?id="+encodeURIComponent(x.dataset.del),{method:"DELETE"}).then(show).catch(function(){toast("Échec, réessaie")})}})};
+  $("ia").hidden=!((S.inbox&&S.inbox.items)||[]).length;
+  $("ia").onclick=function(){if(!confirm("Effacer toutes les notifications ?"))return;window.KidaAPI("/api/inbox",{method:"DELETE"}).then(show).catch(function(){toast("Échec, réessaie")})};
+  window.KidaAPI("/api/inbox").then(function(j){show(j);return window.KidaAPI("/api/inbox",{method:"POST"})}).then(function(){$("bell").classList.remove("has");if(S.inbox)S.inbox.unseen=0}).catch(function(){})}
 (function(){var q=new URLSearchParams(location.search).get("strava");if(!q)return;history.replaceState(null,"","/");
   setTimeout(function(){toast(q==="ok"?"Strava connecté":q==="config"?"Il manque les codes Strava sur Vercel":"Connexion Strava annulée")},600)})();
 
