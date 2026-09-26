@@ -281,3 +281,28 @@ enum NotificationType {
   WORKOUT_REMINDER
   GOAL_UPDATE
 }
+
+// ── App « Kida » (hub) ───────────────────────────────────────────────────
+// Documents JSON du hub : "races/<id>" et "profile/me".
+model HubDoc {
+  path      String   @id
+  coll      String
+  data      Json
+  updatedAt DateTime @updatedAt
+
+  @@index([coll])
+}
+
+// Petit stockage clé → valeur (jetons Strava, cache chaussures…).
+model KV {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+// Abonnements aux notifications (Web Push) des appareils installés.
+model PushSub {
+  endpoint  String   @id
+  keys      Json
+  createdAt DateTime @default(now())
+}
