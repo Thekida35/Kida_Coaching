@@ -20,6 +20,10 @@ export function makeState() {
     ],
     unseen: 1,
     prefs: { briefTime: "06:45", notify: { brief: true, veille: true, bilan: true, analyse: true } },
+    me: null as unknown,
+    weather: null as unknown, // null → météo indisponible (503)
+    activities: null as unknown[] | null, // null → Strava indisponible (503)
+    gear: null as unknown[] | null,
     reply: "**Verdict :** bonne séance.\n\n| km | Allure |\n|---|---|\n| 1 | 3:40 |\n\n- Garde ce rythme",
   };
 }
@@ -46,7 +50,7 @@ export async function mockApp(page: Page, s: State) {
     if (!s.logged) return p.startsWith("/api/") ? json(r, { error: "auth" }, 401) : r.fulfill({ contentType: "text/html", body: '<script>location.replace("/login")</script>' }); // (une vraie redirection 302 échapperait à la simulation)
     if (p === "/") return file(r, "app.html");
     if (p.startsWith("/app/")) return file(r, p.slice(1));
-    if (p === "/api/store") return json(r, { races: s.races, me: null });
+    if (p === "/api/store") return json(r, { races: s.races, me: s.me });
     if (p === "/api/prefs") {
       if (m === "PUT") Object.assign(s.prefs.notify, JSON.parse(req.postData() || "{}").notify ?? {});
       return json(r, s.prefs);
@@ -64,6 +68,9 @@ export async function mockApp(page: Page, s: State) {
       return r.fulfill({ status: 200, contentType: "text/plain; charset=utf-8", body: s.reply });
     }
     if (p === "/api/strava/status") return json(r, { configured: true, connected: true, athlete: "Killian" });
+    if (p === "/api/weather" && s.weather) return json(r, s.weather);
+    if (p === "/api/strava/activities" && s.activities) return json(r, { activities: s.activities });
+    if (p === "/api/strava/gear" && s.gear) return json(r, { gear: s.gear });
     if (p.startsWith("/api/strava/") || p === "/api/weather") return json(r, { error: "unavailable" }, 503);
     if (p === "/api/push/key") return json(r, { key: null });
     return json(r, { error: "not_found" }, 404);

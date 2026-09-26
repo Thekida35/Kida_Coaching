@@ -45,7 +45,7 @@ Le service worker sert `/` et `/app/*` depuis le cache puis les met à jour en a
 
 - `coachContext.ts` : contexte complet du coach — profil `DEFAULT_NOTES` (tiré de son ancienne conversation Claude : blessures, physiologie, chaussures, habitudes) ou notes éditées (KV `coach_notes`), course en focus, courses passées, forme, **12 mois de Strava** (cache 20 min, KV `coach_strava`).
 - `chat.ts` : conversation (KV `coach_chat`, 200 messages gardés, 24 envoyés au modèle).
-- `notify.ts` → `runTick()` : appelé par `/api/cron/brief` (Vercel Cron 1×/jour + **GitHub Actions toutes les 30 min**, `.github/workflows/notify.yml`, secret `CRON_SECRET`).
+- `notify.ts` → `runTick()` : appelé par `/api/cron/brief` (Vercel Cron 1×/jour + **GitHub Actions toutes les 30 min**, `.github/workflows/notify.yml`, secret `CRON_SECRET`, variable facultative `APP_URL`).
   Envoie une fois par jour chacun : brief (heure choisie, jusqu'à +3 h), veille de séance clé (20 h), bilan de course (20 h 30). Marqueurs dans KV `notif_sent`.
 - `analyse.ts` : **coach proactif**, appelé à chaque `runTick` : nouvelle course à pied Strava (< 36 h, KV `analysed.lastId`) → détail + tours + km + météo Open-Meteo → analyse Gemini → rangée dans le chat + notification « 📊 Analyse prête » qui ouvre `/?v=coach`.
   Au tout premier passage il ne fait que noter la dernière sortie (pas d'analyse rétroactive).
@@ -60,6 +60,8 @@ Le service worker sert `/` et `/app/*` depuis le cache puis les met à jour en a
   Ajouter un cas dans `e2e/app.spec.ts` pour chaque nouvel écran ou bouton. En environnement Claude Code, Chromium est déjà dans `/opt/pw-browsers` (ne pas lancer `playwright install`).
 - `npx tsc --noEmit` : le build Vercel vérifie les types (ESLint est désactivé).
 - La CI GitHub (`.github/workflows/tests.yml`) lance les trois à chaque PR.
+- `npm run screenshots` : regénère les captures du README (`docs/screens/`) avec les **données fictives** de `e2e/demo.ts`
+  (coureur « Alex », courses inventées). Ne jamais y mettre les vraies données de Killian. À relancer quand un écran change.
 
 ### Essai complet en local (serveur + base)
 

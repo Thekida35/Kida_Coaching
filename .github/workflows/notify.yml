@@ -14,6 +14,7 @@ jobs:
       - name: Appeler l'app
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL || 'https://kida-coaching.vercel.app' }}
         run: |
           if [ -z "$CRON_SECRET" ]; then echo "Secret CRON_SECRET absent : rien à faire."; exit 0; fi
-          curl -fsS -m 60 -H "Authorization: Bearer $CRON_SECRET" https://kida-coaching.vercel.app/api/cron/brief
+          curl -fsS -m 60 -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/brief"
