@@ -6,5 +6,5 @@ export const runtime = "nodejs";
 
 export async function POST() {
   const b = await buildBrief(true);
-  return NextResponse.json(await sendAll(b ?? { title: "Kida", body: "Les notifications fonctionnent." }));
+  return NextResponse.json(await sendAll(b ?? { title: "Kida", body: "Les notifications fonctionnent." }, "test"));
 }

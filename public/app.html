@@ -40,7 +40,24 @@ button{cursor:pointer}
 .hsub{display:block;font-size:14px;color:var(--mid);font-weight:500;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rnd{width:52px;height:52px;border-radius:50%;border:1.5px solid #dcdcd8;background:transparent;display:grid;place-items:center;position:relative;color:var(--ink)}
 .rnd svg{width:22px;height:22px}
-.rnd i{position:absolute;top:13px;right:14px;width:9px;height:9px;border-radius:50%;background:#ef6a55;border:2px solid var(--bg)}
+.rnd i{display:none;position:absolute;top:13px;right:14px;width:9px;height:9px;border-radius:50%;background:#ef6a55;border:2px solid var(--bg)}
+.rnd.has i{display:block}
+button.avw{border:0;cursor:pointer}
+.sw{position:relative;display:inline-block;width:46px;height:28px;flex:0 0 46px;vertical-align:middle}
+.sw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.sw i{position:absolute;inset:0;border-radius:999px;background:#d9d9d5;transition:background .2s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.sw input:checked+i{background:#5bbf8a}
+.sw input:checked+i::after{transform:translateX(18px)}
+.tsel{border:0;background:var(--soft);border-radius:12px;padding:8px 10px;font:600 14px Urbanist,sans-serif;color:var(--ink);margin-right:8px}
+.codef{display:grid;gap:8px;padding:10px 0 4px}
+.codef input{border:1.5px solid #e0e0dc;border-radius:14px;padding:12px 14px;font:500 16px Urbanist,sans-serif;background:#fff}
+.inbox{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto}
+.nt{background:var(--card);border-radius:18px;padding:12px 14px}
+.nh{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.nh b{font-size:15px}
+.nh span{font-size:12px;color:var(--dim);white-space:nowrap}
+.nt p{margin-top:4px;font-size:14px;color:#3a3b40;white-space:pre-line;line-height:1.4}
 .back{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:0;border-radius:999px;padding:10px 16px 10px 12px;font-weight:600;font-size:14px;color:var(--ink);min-height:44px}
 
 /* titres de section */
@@ -255,7 +272,7 @@ td+td,th+th{padding-left:14px}
 .fld input,.fld select,.fld textarea{width:100%;background:var(--card);border:1.5px solid transparent;border-radius:18px;padding:13px 15px;font-weight:600;font-size:16px;outline:none}
 .fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--lav)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-weight:600;font-size:14px;z-index:90;box-shadow:var(--navsh)}
+.toast{position:fixed;left:50%;top:calc(14px + var(--sat,env(safe-area-inset-top,0px)));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-weight:600;font-size:14px;z-index:90;box-shadow:var(--navsh)}
 .err{color:var(--red);font-size:13.5px;font-weight:600;margin:4px 6px 0}
 
 .coachbtn{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;background:var(--card);border:0;border-radius:26px;padding:12px 14px;text-align:left}
@@ -319,17 +336,20 @@ nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stro
 :focus-visible{outline:2px solid var(--vio);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
-<style>.app{padding-top:env(safe-area-inset-top,0px);box-sizing:border-box}
+<style>.app{padding-top:var(--sat,env(safe-area-inset-top,0px));box-sizing:border-box}
 /* bande opaque sous l'heure et la batterie : le contenu qui défile ne passe pas dessous */
-body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:40}</style>
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--sat,env(safe-area-inset-top,0px));background:var(--bg);z-index:40}</style>
+<script>(function(){var p=document.createElement("div");p.style.cssText="position:fixed;top:0;height:env(safe-area-inset-top,0px)";document.documentElement.appendChild(p);var h=p.offsetHeight;p.remove();
+  var sa=navigator.standalone===true||matchMedia("(display-mode: standalone)").matches;if(!h&&sa)h=screen.height>=852?54:screen.height>=812?47:20;
+  document.documentElement.style.setProperty("--sat",h+"px")})();</script>
 </head><body>
 
 
 <div class="app" id="app">
   <div class="top">
-    <div class="avw" title="Killian"><img src="/icons/avatar.jpg?v=2" alt="" aria-hidden="true" style="display:block;width:100%;height:100%;border-radius:50%;object-fit:cover"></div>
+    <button class="avw" id="me" aria-label="Réglages"><img src="/icons/avatar.jpg?v=2" alt="" aria-hidden="true" style="display:block;width:100%;height:100%;border-radius:50%;object-fit:cover"></button>
     <div class="hc"><h1 class="ttl" id="ttl">Accueil</h1><span class="hsub" id="hsub"></span></div>
-    <button class="rnd" id="bell" aria-label="Brief du matin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 003.4 0"/></svg><i></i></button>
+    <button class="rnd" id="bell" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 003.4 0"/></svg><i></i></button>
   </div>
   <main id="main"><div class="empty" style="margin-top:18px">Chargement de tes courses…</div></main>
 </div>
@@ -390,7 +410,9 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch
 var K="kidahub:";
 function save(k,v){try{localStorage.setItem(K+k,v)}catch(e){}}
 function load(k){try{return localStorage.getItem(K+k)}catch(e){return null}}
-document.getElementById("bell").onclick=function(){settingsSheet()};
+document.getElementById("bell").onclick=inboxSheet;document.getElementById("me").onclick=settingsSheet;
+setTimeout(refreshDot,300);document.addEventListener("visibilitychange",function(){if(!document.hidden)refreshDot()});
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",function(e){if(e.data&&e.data.type==="push")refreshDot()});
 
 var S={races:[],me:null,db:null,mcp:null,sample:null,wx:{},acts:null,gear:null,stOn:false,wxOn:{},ok:false,failed:false,view:"home",raceId:null,tab:null};
 var $=function(id){return document.getElementById(id)};
@@ -806,30 +828,56 @@ function genFiche(){var r=race(S.raceId);if(!r||!S.sample)return;var btn=documen
     if(!r.goalSel)patch.goalSel="B";patch.generated=todayKey();
     Object.assign(r,patch);render();write(r.id,patch);toast("Fiche générée");
   }).catch(function(e){var c=e&&e.code;toast(c==="sampling_disabled"?"Le coach n'est pas configuré sur le serveur.":c==="rate_limited"?"Trop de demandes : réessaie dans quelques minutes.":"La génération a échoué, réessaie.");render()})}
-function genBtn(r){return S.sample&&r.status!=="done"&&days(r.date)>=0?'<button class="btn w" data-gen="1" style="margin-top:0;margin-bottom:4px">'+((r.plan||[]).length?"Regénérer la fiche":"Générer la fiche complète avec Claude")+'</button>':""}
+function genBtn(r){return S.sample&&r.status!=="done"&&days(r.date)>=0?'<button class="btn w" data-gen="1" style="margin-top:0;margin-bottom:4px">'+((r.plan||[]).length?"Regénérer la fiche":"Générer la fiche complète")+'</button>':""}
 
-/* ── réglages (cloche) ── */
-function b64u(s){var p="=".repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/")),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
-function isStandalone(){return window.navigator.standalone===true||matchMedia("(display-mode: standalone)").matches}
 async function pushState(){try{if(!("serviceWorker" in navigator)||!("PushManager" in window))return "unsupported";var r=await navigator.serviceWorker.ready;return (await r.pushManager.getSubscription())?"on":"off"}catch(e){return "unsupported"}}
 async function enablePush(){
   if(!("serviceWorker" in navigator)||!("PushManager" in window)){toast(isStandalone()?"Ton iPhone ne gère pas les notifications web (iOS 16.4 minimum).":"Ajoute d'abord Kida à l'écran d'accueil, puis ouvre-la depuis l'icône.");return}
   var perm=await Notification.requestPermission();if(perm!=="granted"){toast("Notifications refusées. Tu peux les réactiver dans Réglages → Notifications → Kida.");return}
   var k=await window.KidaAPI("/api/push/key");if(!k.key){toast("Les clés de notification ne sont pas encore configurées sur Vercel.");return}
   var reg=await navigator.serviceWorker.ready;var s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k.key)});
-  await window.KidaAPI("/api/push/subscribe",{method:"POST",body:JSON.stringify(s)});toast("Brief activé : chaque matin à 6 h 45");settingsSheet()}
+  await window.KidaAPI("/api/push/subscribe",{method:"POST",body:JSON.stringify(s)});toast("Notifications activées");settingsSheet()}
 async function disablePush(){try{var reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();if(s){await window.KidaAPI("/api/push/subscribe",{method:"DELETE",body:JSON.stringify({endpoint:s.endpoint})});await s.unsubscribe()}}catch(e){}toast("Brief désactivé");settingsSheet()}
+/* ── notifications push ── */
+function b64u(s){var p="=".repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/")),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+function isStandalone(){return window.navigator.standalone===true||matchMedia("(display-mode: standalone)").matches}
+/* ── réglages (avatar) ── */
+function timeOpts(sel){var t=[];for(var m=5*60;m<=9*60+30;m+=15)t.push(String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"));if(sel&&t.indexOf(sel)<0){t.push(sel);t.sort()}
+  return t.map(function(h){return '<option value="'+h+'"'+(h===sel?" selected":"")+'>'+h.replace(":"," h ")+'</option>'}).join("")}
+function sw(id,on){return '<label class="sw"><input type="checkbox" id="'+id+'"'+(on?" checked":"")+'><i></i></label>'}
 async function settingsSheet(){var L=$("layer");
   L.innerHTML='<div class="sheet-bg"><div class="sheet"><h2>Réglages</h2><div class="lc" id="setl"><div class="r"><span class="l">Chargement…</span></div></div><div class="row2" style="margin-top:12px"><button type="button" class="btn soft" id="lo">Se déconnecter</button><button type="button" class="btn" id="sc">Fermer</button></div></div></div>';
   $("sc").onclick=function(){L.innerHTML=""};L.querySelector(".sheet-bg").onclick=function(e){if(e.target===this)L.innerHTML=""};
   $("lo").onclick=function(){window.KidaAPI("/api/logout",{method:"POST"}).finally(function(){location.href="/login"})};
-  var st={};try{st=await window.KidaAPI("/api/strava/status")}catch(e){}
-  var ps=await pushState(),el=$("setl");if(!el)return;
-  el.innerHTML='<div class="r"><span class="l">Strava</span><span class="v s">'+(st.connected?'<span class="g">Connecté'+(st.athlete?' · '+esc(st.athlete):'')+'</span>':st.configured?'<a class="btn" style="min-height:40px;padding:9px 14px;text-decoration:none" href="/api/strava/connect">Connecter</a>':'<span class="dm">Codes Strava absents sur Vercel</span>')+'</span></div>'+
-    '<div class="r"><span class="l">Brief du matin<br><small class="dm" style="font-size:12.5px">6 h 45, 10 jours avant une course</small></span><span class="v s">'+(ps==="on"?'<button class="btn soft" style="min-height:40px;padding:9px 14px;background:var(--soft)" id="pt">Tester</button> <button class="btn soft" style="min-height:40px;padding:9px 14px;background:var(--soft)" id="pd">Couper</button>':ps==="off"?'<button class="btn" style="min-height:40px;padding:9px 14px" id="pe">Activer</button>':'<span class="dm">'+(isStandalone()?"Non pris en charge":"Ouvre Kida depuis l'écran d'accueil")+'</span>')+'</span></div>';
+  var got=await Promise.all([window.KidaAPI("/api/strava/status").catch(function(){return {}}),window.KidaAPI("/api/prefs").catch(function(){return null}),pushState()]);
+  var st=got[0],pf=got[1]||{briefTime:"06:45",notify:{brief:true,veille:true,bilan:true}},ps=got[2],el=$("setl");if(!el)return;S.prefs=pf;
+  var small=function(t){return '<br><small class="dm" style="font-size:12.5px">'+t+'</small>'},mini='style="min-height:40px;padding:9px 14px"',soft='style="min-height:40px;padding:9px 14px;background:var(--soft)"';
+  el.innerHTML='<div class="r"><span class="l">Strava</span><span class="v s">'+(st.connected?'<span class="g">Connecté'+(st.athlete?' · '+esc(st.athlete):'')+'</span>':st.configured?'<a class="btn" '+mini.slice(0,-1)+';text-decoration:none" href="/api/strava/connect">Connecter</a>':'<span class="dm">Codes Strava absents sur Vercel</span>')+'</span></div>'+
+    '<div class="r"><span class="l">Notifications'+small("sur cet iPhone")+'</span><span class="v s">'+(ps==="on"?'<button class="btn soft" '+soft+' id="pt">Tester</button> <button class="btn soft" '+soft+' id="pd">Couper</button>':ps==="off"?'<button class="btn" '+mini+' id="pe">Activer</button>':'<span class="dm">'+(isStandalone()?"Non prises en charge":"Ouvre Kida depuis l'écran d'accueil")+'</span>')+'</span></div>'+
+    '<div class="r"><span class="l">Brief du matin'+small("10 jours avant une course")+'</span><span class="v s"><select class="tsel" id="bt">'+timeOpts(pf.briefTime)+'</select>'+sw("nb",pf.notify.brief)+'</span></div>'+
+    '<div class="r"><span class="l">Veille de séance clé'+small("la veille à 20 h")+'</span><span class="v s">'+sw("nv",pf.notify.veille)+'</span></div>'+
+    '<div class="r"><span class="l">Bilan de course'+small("le soir de la course, 20 h 30")+'</span><span class="v s">'+sw("nl",pf.notify.bilan)+'</span></div>'+
+    '<div class="r"><span class="l">Code d\'accès</span><span class="v s"><button class="btn soft" '+soft+' id="cc">Changer</button></span></div>'+
+    '<form class="codef" id="codef" hidden><input id="c1" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Code actuel" maxlength="6"><input id="c2" type="password" inputmode="numeric" autocomplete="new-password" placeholder="Nouveau code (4 à 6 chiffres)" maxlength="6"><button class="btn" '+mini+'>Enregistrer</button></form>';
+  var save=function(patch,msg){window.KidaAPI("/api/prefs",{method:"PUT",body:JSON.stringify(patch)}).then(function(p){S.prefs=p;toast(msg)}).catch(function(){toast("Échec, réessaie")})};
+  $("bt").onchange=function(){save({briefTime:this.value},"Brief à "+this.value.replace(":"," h "))};
+  [["nb","brief","Brief du matin"],["nv","veille","Veille de séance clé"],["nl","bilan","Bilan de course"]].forEach(function(x){$(x[0]).onchange=function(){var n={};n[x[1]]=this.checked;save({notify:n},x[2]+(this.checked?" activé":" coupé"))}});
+  $("cc").onclick=function(){var f=$("codef");f.hidden=!f.hidden;if(!f.hidden)$("c1").focus()};
+  $("codef").onsubmit=function(e){e.preventDefault();var a=$("c1").value.trim(),b=$("c2").value.trim();if(!/^\d{4,6}$/.test(b)){toast("Le nouveau code doit faire 4 à 6 chiffres");return}
+    fetch("/api/code",{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({current:a,next:b})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;toast("Code changé");$("codef").hidden=true;$("c1").value=$("c2").value=""})}).catch(function(j){toast((j&&j.error)||"Échec, réessaie")})};
   if($("pe"))$("pe").onclick=enablePush;if($("pd"))$("pd").onclick=disablePush;
-  if($("pt"))$("pt").onclick=function(){window.KidaAPI("/api/push/test",{method:"POST"}).then(function(r){toast(r.sent?"Notification envoyée":"Aucun appareil n'a reçu la notification")}).catch(function(){toast("Échec de l'envoi")})};
+  if($("pt"))$("pt").onclick=function(){window.KidaAPI("/api/push/test",{method:"POST"}).then(function(r){toast(r.sent?"Notification envoyée":"Aucun appareil n'a reçu la notification");refreshDot()}).catch(function(){toast("Échec de l'envoi")})};
 }
+
+/* ── notifications reçues (cloche) ── */
+function ago(t){var s=(Date.now()-t)/1e3;if(s<3600)return "il y a "+Math.max(1,Math.round(s/60))+" min";if(s<86400)return "il y a "+Math.round(s/3600)+" h";var d=new Date(t);return DW[d.getDay()]+" "+d.getDate()+" "+MO[d.getMonth()]}
+function refreshDot(){window.KidaAPI("/api/inbox").then(function(j){S.inbox=j;$("bell").classList.toggle("has",j.unseen>0)}).catch(function(){})}
+function inboxSheet(){var L=$("layer"),draw=function(j){var it=(j&&j.items)||[];
+    return it.length?'<div class="inbox">'+it.map(function(n){return '<div class="nt"><div class="nh"><b>'+esc(n.title)+'</b><span>'+ago(n.t)+'</span></div><p>'+esc(n.body)+'</p></div>'}).join("")+'</div>'
+      :'<div class="empty" style="margin:6px 0 0">Rien pour l\'instant. Ton brief du matin et tes rappels arriveront ici.</div>'};
+  L.innerHTML='<div class="sheet-bg"><div class="sheet"><h2>Notifications</h2><div id="inb">'+draw(S.inbox)+'</div><div class="row2" style="margin-top:12px"><button type="button" class="btn" id="ic" style="grid-column:1/-1">Fermer</button></div></div></div>';
+  $("ic").onclick=function(){L.innerHTML=""};L.querySelector(".sheet-bg").onclick=function(e){if(e.target===this)L.innerHTML=""};
+  window.KidaAPI("/api/inbox").then(function(j){S.inbox=j;var b=$("inb");if(b)b.innerHTML=draw(j);return window.KidaAPI("/api/inbox",{method:"POST"})}).then(function(){$("bell").classList.remove("has");if(S.inbox)S.inbox.unseen=0}).catch(function(){})}
 (function(){var q=new URLSearchParams(location.search).get("strava");if(!q)return;history.replaceState(null,"","/");
   setTimeout(function(){toast(q==="ok"?"Strava connecté":q==="config"?"Il manque les codes Strava sur Vercel":"Connexion Strava annulée")},600)})();
 

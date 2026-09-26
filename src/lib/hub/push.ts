@@ -1,5 +1,6 @@
 import webpush from "web-push";
 import { prisma } from "@/lib/hub/db";
+import { addInbox } from "@/lib/hub/inbox";
 
 /** Clés VAPID nettoyées : un copier-coller dans Vercel ajoute vite un espace, un retour ligne ou des guillemets. */
 export function vapidKey(name: "VAPID_PUBLIC_KEY" | "VAPID_PRIVATE_KEY") {
@@ -10,8 +11,9 @@ export function pushReady() {
   return !!(vapidKey("VAPID_PUBLIC_KEY") && vapidKey("VAPID_PRIVATE_KEY"));
 }
 
-/** Envoie une notification à tous les appareils abonnés ; retire ceux qui ont expiré. */
-export async function sendAll(payload: { title: string; body: string; url?: string }) {
+/** Envoie une notification à tous les appareils abonnés (retire ceux qui ont expiré) et la range dans la boîte de la cloche. */
+export async function sendAll(payload: { title: string; body: string; url?: string }, kind = "info") {
+  await addInbox({ kind, title: payload.title, body: payload.body });
   if (!pushReady()) return { sent: 0, reason: "vapid_missing" };
   webpush.setVapidDetails("mailto:kida@kida-coaching.app", vapidKey("VAPID_PUBLIC_KEY"), vapidKey("VAPID_PRIVATE_KEY"));
   const subs = await prisma.pushSub.findMany();
