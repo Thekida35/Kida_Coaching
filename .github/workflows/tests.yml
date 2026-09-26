@@ -15,7 +15,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx tsc --noEmit
+      # next-env.d.ts (ignoré par git, créé par next dev/build) apporte les types propres à Next
+      - run: echo '/// <reference types="next" />' > next-env.d.ts && npx tsc --noEmit
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
