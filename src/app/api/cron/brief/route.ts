@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { runTick } from "@/lib/hub/notify";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 /** Appelé par Vercel Cron (1×/jour) et par GitHub Actions (toutes les 30 min) : voir lib/hub/notify. */
 export async function GET(req: NextRequest) {

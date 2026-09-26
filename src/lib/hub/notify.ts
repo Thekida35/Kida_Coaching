@@ -2,12 +2,15 @@ import { kvGet, kvSet } from "@/lib/hub/db";
 import { buildBilan, buildBrief, buildVeille, parisToday } from "@/lib/hub/brief";
 import { getPrefs, type NotifyKind } from "@/lib/hub/prefs";
 import { sendAll } from "@/lib/hub/push";
+import { analyseNewRun } from "@/lib/hub/analyse";
+import { NotConnected } from "@/lib/hub/strava";
 
 const min = (hhmm: string) => +hhmm.slice(0, 2) * 60 + +hhmm.slice(3, 5);
 
 /**
  * Appelé plusieurs fois par jour (cron) : envoie chaque notification une seule fois,
  * dès que son heure est passée. Le brief n'est plus envoyé 3 h après l'heure choisie.
+ * Vérifie aussi s'il y a une nouvelle sortie Strava à analyser (voir lib/hub/analyse).
  */
 export async function runTick(now = new Date()) {
   const prefs = await getPrefs();
@@ -28,5 +31,7 @@ export async function runTick(now = new Date()) {
     done[kind] = n ? await sendAll(n, kind) : "rien à envoyer";
   }
   await kvSet("notif_sent", sent);
+  // Coach proactif : la dernière sortie Strava est analysée dès qu'elle arrive.
+  if (prefs.notify.analyse) done.analyse = await analyseNewRun(now.getTime()).catch((e) => (e instanceof NotConnected ? "Strava non connecté" : `erreur : ${(e as Error).message}`));
   return { at: `${today} ${hm}`, done };
 }
