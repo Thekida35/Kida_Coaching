@@ -1,5 +1,5 @@
 /* Kida — service worker : ouverture instantanée (cache de l'app) et notifications du brief. */
-const VERSION = "kida-v6";
+const VERSION = "kida-v7";
 const STATIC = /^\/(icons\/|apple-touch-icon|manifest\.webmanifest)/;
 
 self.addEventListener("install", () => self.skipWaiting());
@@ -22,6 +22,27 @@ self.addEventListener("fetch", (e) => {
         const fresh = fetch(req)
           .then((res) => {
             if (res.ok && !res.redirected) c.put("/", res.clone());
+            return res;
+          })
+          .catch(() => cached);
+        if (cached) {
+          e.waitUntil(fresh);
+          return cached;
+        }
+        return fresh;
+      }),
+    );
+    return;
+  }
+
+  // Code de l'app (/app/*.js, /app/app.css) : cache tout de suite, rafraîchi en arrière-plan.
+  if (url.origin === location.origin && url.pathname.startsWith("/app/")) {
+    e.respondWith(
+      caches.open(VERSION).then(async (c) => {
+        const cached = await c.match(req);
+        const fresh = fetch(req)
+          .then((res) => {
+            if (res.ok && !res.redirected) c.put(req, res.clone());
             return res;
           })
           .catch(() => cached);

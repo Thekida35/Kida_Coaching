@@ -1,4 +1,4 @@
-# Notifications de Kida (brief du matin à l'heure choisie, veille de séance clé, bilan de course).
+# Notifications de Kida (brief du matin à l'heure choisie, veille de séance clé, bilan de course) et analyse auto des sorties Strava.
 # Vercel Cron (offre gratuite) ne passe qu'une fois par jour : ce workflow appelle l'app toutes les 30 min
 # de 5 h à 23 h (heure de Paris, été). Il faut le secret de dépôt CRON_SECRET (même valeur que sur Vercel).
 name: Notifications Kida

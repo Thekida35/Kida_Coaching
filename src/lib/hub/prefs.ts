@@ -1,9 +1,9 @@
 import { kvGet, kvSet } from "@/lib/hub/db";
 
-export type NotifyKind = "brief" | "veille" | "bilan";
+export type NotifyKind = "brief" | "veille" | "bilan" | "analyse";
 export type Prefs = { briefTime: string; notify: Record<NotifyKind, boolean> };
 
-export const DEFAULT_PREFS: Prefs = { briefTime: "06:45", notify: { brief: true, veille: true, bilan: true } };
+export const DEFAULT_PREFS: Prefs = { briefTime: "06:45", notify: { brief: true, veille: true, bilan: true, analyse: true } };
 
 export async function getPrefs(): Promise<Prefs> {
   const p = await kvGet<Partial<Prefs>>("prefs");
