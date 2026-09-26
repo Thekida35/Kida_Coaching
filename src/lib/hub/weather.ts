@@ -27,6 +27,7 @@ export async function forecast(lat: number, lon: number) {
         temperature: d.temperature_2m_max[i],
         displayTemperature: `${Math.round(d.temperature_2m_max[i])}°`,
         realFeel: `${Math.round(d.apparent_temperature_max[i])}°`,
+        code: d.weather_code[i] as number,
         iconPhrase: WMO[d.weather_code[i]] ?? "—",
         precip: d.precipitation_probability_max[i] == null ? "—" : `${d.precipitation_probability_max[i]} %`,
         extended: {
