@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "screenshots": "SHOTS=1 playwright test screenshots",
     "db:push": "prisma db push",
     "db:studio": "prisma studio"
   },
