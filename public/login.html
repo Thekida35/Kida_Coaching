@@ -43,7 +43,7 @@ var LEN=6,code="",busy=false;
 var dots=document.getElementById("dots"),pad=document.getElementById("pad"),err=document.getElementById("err");
 function draw(){dots.innerHTML="";for(var i=0;i<LEN;i++){var d=document.createElement("i");if(i<code.length)d.className="on";dots.appendChild(d)}}
 ["1","2","3","4","5","6","7","8","9","","0","⌫"].forEach(function(k){var b=document.createElement("button");b.type="button";
-  if(k===""){b.className="ghost";b.textContent="4 chiffres ?";b.onclick=function(){if(code.length>=4)send()};b.setAttribute("aria-label","Valider un code plus court")}
+  if(k===""){b.className="ghost";b.textContent="Valider";b.onclick=function(){if(code.length>=4)send()};b.setAttribute("aria-label","Valider un code plus court")}
   else if(k==="⌫"){b.className="ghost";b.textContent="Effacer";b.onclick=function(){code=code.slice(0,-1);draw()}}
   else{b.textContent=k;b.onclick=function(){if(busy||code.length>=LEN)return;code+=k;err.textContent="";draw();if(code.length===LEN)send()}}
   pad.appendChild(b)});

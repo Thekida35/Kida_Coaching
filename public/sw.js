@@ -1,5 +1,5 @@
 /* Kida — service worker : ouverture instantanée (cache de l'app) et notifications du brief. */
-const VERSION = "kida-v3";
+const VERSION = "kida-v4";
 const STATIC = /^\/(icons\/|apple-touch-icon|manifest\.webmanifest)/;
 
 self.addEventListener("install", () => self.skipWaiting());
@@ -54,7 +54,11 @@ self.addEventListener("fetch", (e) => {
 self.addEventListener("push", (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
-  e.waitUntil(self.registration.showNotification(d.title || "Kida", { body: d.body || "", icon: "/icons/icon-192.png?v=2", badge: "/icons/icon-192.png?v=2", data: { url: d.url || "/" } }));
+  e.waitUntil(Promise.all([
+    self.registration.showNotification(d.title || "Kida", { body: d.body || "", icon: "/icons/icon-192.png?v=2", badge: "/icons/icon-192.png?v=2", data: { url: d.url || "/" } }),
+    // l'app ouverte rafraîchit le point rouge de la cloche
+    self.clients.matchAll({ type: "window" }).then((cs) => cs.forEach((c) => c.postMessage({ type: "push" }))),
+  ]));
 });
 
 self.addEventListener("notificationclick", (e) => {

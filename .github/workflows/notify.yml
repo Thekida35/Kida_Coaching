@@ -1,0 +1,19 @@
+# Notifications de Kida (brief du matin à l'heure choisie, veille de séance clé, bilan de course).
+# Vercel Cron (offre gratuite) ne passe qu'une fois par jour : ce workflow appelle l'app toutes les 30 min
+# de 5 h à 23 h (heure de Paris, été). Il faut le secret de dépôt CRON_SECRET (même valeur que sur Vercel).
+name: Notifications Kida
+on:
+  schedule:
+    - cron: "*/30 3-21 * * *"
+  workflow_dispatch:
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Appeler l'app
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then echo "Secret CRON_SECRET absent : rien à faire."; exit 0; fi
+          curl -fsS -m 60 -H "Authorization: Bearer $CRON_SECRET" https://kida-coaching.vercel.app/api/cron/brief

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildBrief } from "@/lib/hub/brief";
-import { sendAll } from "@/lib/hub/push";
+import { runTick } from "@/lib/hub/notify";
 
 export const runtime = "nodejs";
 
+/** Appelé par Vercel Cron (1×/jour) et par GitHub Actions (toutes les 30 min) : voir lib/hub/notify. */
 export async function GET(req: NextRequest) {
-  if (req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: "auth" }, { status: 401 });
-  const b = await buildBrief();
-  if (!b) return NextResponse.json({ skipped: "no_race_in_10_days" });
-  return NextResponse.json(await sendAll(b));
+  if (!process.env.CRON_SECRET || req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`)
+    return NextResponse.json({ error: "auth" }, { status: 401 });
+  return NextResponse.json(await runTick());
 }
