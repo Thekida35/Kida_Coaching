@@ -107,6 +107,14 @@ h3 .x{margin-left:auto;font-size:14.5px;color:var(--dim);font-weight:600;backgro
 
 /* coach accueil */
 .coach{background:var(--card);border-radius:30px;padding:18px}
+.cpage{margin-top:14px}
+.cfacts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.cfacts>div{border-radius:20px;padding:12px 13px;min-width:0}
+.cfacts u{display:block;text-decoration:none;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#3a3b40;opacity:.75}
+.cfacts b{display:block;font-size:15px;font-weight:700;margin-top:3px;line-height:1.25}
+.cfacts span{display:block;font-size:12.5px;font-weight:500;color:#3a3b40;margin-top:3px;line-height:1.35}
+.coachbtn[disabled]{opacity:.5}
+#cform{position:sticky;bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--card);box-shadow:0 6px 24px rgba(15,16,18,.12);z-index:2}
 .coach .ct{display:flex;align-items:center;gap:12px}
 .coach .ci2{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#b6a4fb,#b9dcf9);display:grid;place-items:center;flex:0 0 46px}
 .coach .ci2 svg{width:22px;height:22px}
@@ -407,10 +415,10 @@ function race(id){for(var i=0;i<S.races.length;i++)if(S.races[i].id===id)return 
 var RUN='<svg viewBox="0 0 24 24"><circle cx="15" cy="4" r="1.6"/><path d="M8.5 21l2-5.2 2.6-2-1.6-5.2 3.2 2.6 3 .6M5.6 12.2L8.6 8l3-1"/></svg>';
 
 /* ── router ── */
-function go(v,id,tab){if(v==="coach"){S.view="home";S.focusCoach=true;v="home"}S.view=v;if(id!==undefined)S.raceId=id;S.tab=tab||null;
+function go(v,id,tab){if(v==="coach"){if(S.cctl)S.cctl.abort();S.chat=[];S.coachRace=null}S.view=v;if(id!==undefined)S.raceId=id;S.tab=tab||null;
   document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.v===(v==="race"?"races":v))});
   render();
-  if(S.focusCoach){S.focusCoach=false;var cq=$("hq");if(cq){cq.scrollIntoView({block:"center"});cq.focus()}}else scrollTo(0,0)}
+  scrollTo(0,0)}
 document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){go(b.dataset.v)}});
 
 function render(){
@@ -418,9 +426,9 @@ function render(){
   if(S.failed){m.innerHTML='<div class="empty" style="margin-top:18px"><b>Impossible de charger tes courses.</b><br>Vérifie ta connexion internet, puis rouvre l\'app.</div>';return}
   if(!S.ok){return}
   var nx=upcoming()[0],td=new Date(),dl=DW[td.getDay()];
-  $("ttl").textContent=S.view==="races"?"Mes courses":S.view==="forme"?"Ma forme":S.view==="race"?"Fiche course":dl.charAt(0).toUpperCase()+dl.slice(1)+" "+td.getDate()+" "+MO[td.getMonth()];
+  $("ttl").textContent=S.view==="races"?"Mes courses":S.view==="forme"?"Ma forme":S.view==="race"?"Fiche course":S.view==="coach"?"Coach":dl.charAt(0).toUpperCase()+dl.slice(1)+" "+td.getDate()+" "+MO[td.getMonth()];
   $("hsub").textContent=nx?jx(nx.date)+" · "+nx.name:"Aucune course prévue";
-  m.innerHTML=S.view==="races"?vRaces():S.view==="forme"?vForme():S.view==="race"?vRace():vHome();
+  m.innerHTML=S.view==="races"?vRaces():S.view==="forme"?vForme():S.view==="race"?vRace():S.view==="coach"?vCoach():vHome();
   bind();
 }
 
@@ -444,7 +452,7 @@ function vHome(){
   var h="",n=upcoming()[0];
   if(!n){
     h+='<h3>Prochaine course</h3><div class="hero">'+medalSVG(10)+'<div class="ch3" style="margin-top:0">Aucune course prévue</div><button class="go" style="max-width:60%" data-add="1">Ajouter une course</button></div>';
-    return h+homeCoach(null)}
+    return h}
   watchWx(n);
   var pl=n.plan||[],tk=todayKey(),ck=(n.checks||{}).tap||{};
   if(S.dayIdx==null||S.dayRace!==n.id||S.dayIdx>=pl.length){S.dayRace=n.id;S.dayIdx=0;
@@ -456,7 +464,7 @@ function vHome(){
       '<div class="t">'+esc(p.title)+'</div>'+(p.detail?'<div class="d">'+esc(p.detail)+'</div>':"")+(p.why?'<div class="wy">'+esc(p.why)+'</div>':"")+
       '<div class="blocks">'+blocksFor(p,ty).map(function(b){return '<i class="'+(b[1]===1?"w":"")+'" style="flex:'+b[0]+';height:'+(b[1]*100)+'%"></i>'}).join("")+'</div>'+
       '<div class="acts"><button class="done" data-done="'+S.dayIdx+'" aria-pressed="'+dn+'"><span class="ck">'+CHK+'</span><span>'+(dn?"Faite · annuler":ty==="Repos"?"Repos respecté":"Séance faite")+'</span></button>'+
-      (S.sample?'<button class="cb" data-coach="home" aria-label="Demander au coach">'+BUB+'</button>':"")+'</div></div>';
+      (S.sample?'<button class="cb" data-nav="coach" aria-label="Demander au coach">'+BUB+'</button>':"")+'</div></div>';
     h+='<div class="week" role="tablist" aria-label="Jours jusqu\'à la course">'+pl.map(function(q,i){var d=pd(q.date),t2=dayType(q,n);
       return '<button class="day'+(i===S.dayIdx?" on":"")+(t2==="Course"?" race":"")+'" role="tab" aria-selected="'+(i===S.dayIdx)+'" data-day="'+i+'">'+(ck[i]?'<span class="ok">'+OKI+'</span>':(t2!=="Repos"?'<span class="dot"></span>':""))+'<span class="d">'+DW[d.getDay()].charAt(0).toUpperCase()+DW[d.getDay()].slice(1,3)+'</span><span class="n">'+d.getDate()+'</span></button>'}).join("")+'</div>';
   }else h+='<h3>Aujourd\'hui</h3>'+(genBtn(n)||'<div class="empty">Pas encore de plan pour '+esc(n.name)+'.</div>');
@@ -470,20 +478,7 @@ function vHome(){
     (key?'<button class="mini" style="background:var(--sky)" data-dayd="'+esc(key.date)+'"><div class="k">Prochaine clé</div><div class="v">'+esc((key.title||"").replace(/^Spécifique\s*/i,""))+'</div><div class="s">'+esc(fdate(key.date,true).replace(/ \d{4}$/,""))+'<br>'+esc(key.detail||"")+'</div></button>'
         :'<div class="mini" style="background:var(--sky)"><div class="k">Prédiction</div><div class="v">'+(n.prediction&&n.prediction.s?hms(n.prediction.s):"—")+'</div><div class="s">'+esc((n.prediction&&n.prediction.src)||"")+'</div></div>')+
     '<div class="mini" style="background:var(--butter)"><div class="k">Météo jour J'+(lw?" · direct":"")+'</div><div class="v">'+(lw?esc(lw.displayTemperature||"—"):esc((w.temp||"—").replace(/ max/,"")))+'</div><div class="s">'+(lw?esc(((lw.extended||{}).wind)||"")+'<br>pluie '+esc(lw.precip||"—"):esc(w.wind||"")+(w.sky?'<br>'+esc(w.sky):""))+'</div></div></div>';
-  return h+homeCoach(n)}
-function homeCoach(n){if(!S.sample)return "";
-  var qs=["J'ai mal dormi, j'adapte ?","Allure s'il fait 22 °C ?","Que manger la veille ?"];
-  return '<h3>Coach</h3><div class="coach"><div class="ct"><span class="ci2">'+BUB+'</span><div><b>Une question ?</b><span>Il connaît ton plan, ta forme et la météo.</span></div></div>'+
-    '<div class="sug">'+qs.map(function(q){return '<button data-hq="'+esc(q)+'">'+esc(q)+'</button>'}).join("")+'</div>'+
-    '<form class="ask" id="hform"><input id="hq" placeholder="Ex. : FC repos à 49 ce matin" aria-label="Question au coach" autocomplete="off"><button aria-label="Envoyer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></form>'+
-    (S.hq?'<div class="qq">'+esc(S.hq)+'</div>':"")+(S.ha?'<div class="ans'+(S.hwait?" wait":"")+'" id="hans">'+esc(S.ha)+'</div>':"")+'</div>'}
-function askHome(q){var n=upcoming()[0];if(!S.sample||!q)return;if(S.hctl)S.hctl.abort();
-  S.hq=q;S.ha="Réflexion…";S.hwait=true;render();var ctl=S.hctl=new AbortController();
-  var ctx=n?coachCtx(n):"Tu es le coach de course à pied de Killian. Réponds en français, court et concret.";
-  S.sample([{role:"user",content:ctx},{role:"user",content:q}],{cache:false,signal:ctl.signal,onText:function(u){S.hwait=false;S.ha=u.text;var el=$("hans");if(el){el.classList.remove("wait");el.textContent=u.text}}})
-   .then(function(res){S.ha=res.text;S.hwait=false;S.hctl=null;render()})
-   .catch(function(e){var c=e&&e.code;S.hwait=false;S.hctl=null;
-     S.ha=c==="cancelled"?(e.text||"Arrêté."):c==="not_granted"||c==="sampling_disabled"?"Le coach n'est pas autorisé sur cette page. Recharge-la et accepte la demande.":c==="rate_limited"?"Trop de questions d'un coup : réessaie dans quelques minutes.":(e.text?e.text+"\n\n":"")+"Réponse interrompue. Renvoie ta question.";render()})}
+  return h}
 function records(){var rec=(S.me&&S.me.records)||[];if(!rec.length)return '<div class="empty">Records à compléter.</div>';
   return '<div class="lc">'+rec.map(function(x){return '<div class="r"><span class="l">'+esc(x.k)+'</span><span class="v'+(x.s?"":" dm")+'">'+(x.s?esc(x.label||hms(x.s)):"à compléter")+(x.s&&x.km?'<u>'+pace(x.s,x.km)+'/km</u>':"")+(x.when?'<u>'+esc(x.when)+'</u>':"")+'</span></div>'}).join("")+'</div>'}
 function goalT(r){var g=(r.goals||[]).filter(function(x){return x.k===(r.goalSel||"B")})[0]||(r.goals||[])[0];return g?g.s:null}
@@ -654,33 +649,42 @@ function coachCtx(r){var f=(S.me||{}).forme||{},tk=todayKey();
     (plan?"\nPlan :\n"+plan:"")+(r.planRule?"\nRègle : "+r.planRule.join(" "):"")+
     "\nForme ("+(f.asOf||"?")+") : condition "+f.condition+", fatigue "+f.fatigue+", fraîcheur "+f.tsb+(f.alert?". "+f.alert:"")+
     "\nRepères : seuil ~3:44/km, FC max ~196, zones FC Z2 126-156, Z3 157-172, Z4 173-187. Gêne ischio droit par le passé ; Achille à ménager (pas de sprints)."}
-function coachSheet(){var r=race(S.raceId);if(!r||!S.sample)return;var L=$("layer"),turns=[],ctl=null;
-  L.innerHTML='<div class="sheet-bg"><div class="sheet"><h2>Coach · '+esc(r.name)+'</h2><div class="chat" id="cchat"></div>'+
-    '<div class="chips" id="cchips">'+["J'ai mal dormi, j'adapte ma séance ?","Quelle allure si il fait 22 °C ?","Que manger la veille ?","Comment gérer le départ ?"].map(function(q){return '<button type="button">'+esc(q)+'</button>'}).join("")+'</div>'+
-    '<form id="cform"><label class="fld"><span>Ta question</span><textarea id="cq" rows="2" placeholder="Ex. : ma FC repos est à 49 ce matin"></textarea></label>'+
-    '<div class="row2"><button type="button" class="btn soft" id="cclose">Fermer</button><button type="submit" class="btn" id="csend">Envoyer</button></div></form></div></div>';
-  var chat=$("cchat");
-  $("cclose").onclick=function(){if(ctl)ctl.abort();L.innerHTML=""};
-  L.querySelector(".sheet-bg").onclick=function(e){if(e.target===this){if(ctl)ctl.abort();L.innerHTML=""}};
-  L.querySelectorAll("#cchips button").forEach(function(b){b.onclick=function(){$("cq").value=b.textContent;ask()}});
-  $("cform").onsubmit=function(e){e.preventDefault();if(ctl){ctl.abort();return}ask()};
-  function bubble(cls,t){var d=document.createElement("div");d.className="msg "+cls;d.textContent=t;chat.appendChild(d);d.scrollIntoView({block:"end"});return d}
-  async function ask(){var q=$("cq").value.trim();if(!q)return;$("cq").value="";$("cchips").hidden=true;
-    bubble("u",q);turns.push({role:"user",content:q});var a=bubble("bot wait","Réflexion…");
-    ctl=new AbortController();$("csend").textContent="Arrêter";
-    try{var res=await S.sample([{role:"user",content:coachCtx(r)}].concat(turns),{cache:false,signal:ctl.signal,
-        onText:function(u){a.classList.remove("wait");a.textContent=u.text}});
-      a.textContent=res.text+(res.truncated?"\n\n(Réponse coupée : pose une question plus précise.)":"");turns.push({role:"assistant",content:res.text});
-    }catch(e){var c=e&&e.code;a.classList.remove("wait");
-      if(c==="cancelled"){a.textContent=e.text||"Arrêté."}
-      else if(c==="not_granted"||c==="sampling_disabled"||c==="not_declared"||c==="capability_disabled"||c==="capability_removed"){a.textContent="Le coach n'est pas autorisé sur cette page. Recharge-la et accepte la demande pour l'utiliser.";S.sample=null}
-      else if(c==="rate_limited"){a.textContent=(e.text?e.text+"\n\n":"")+"Trop de questions d'un coup : réessaie dans quelques minutes."}
-      else if(c==="session_expired"){a.textContent="Ta session a expiré : reconnecte-toi à claude.ai."}
-      else if(c==="refused"){a.textContent="Le coach n'a pas pu répondre à cette question. Reformule-la."}
-      else{a.textContent=(e.text?e.text+"\n\n":"")+"Réponse interrompue. Renvoie ta question."}
-      turns.pop();
-    }finally{ctl=null;$("csend").textContent="Envoyer"}}
-}
+/* ── COACH (page dédiée) ── */
+function coachRace(){return (S.coachRace&&race(S.coachRace))||upcoming()[0]||null}
+function vCoach(){var r=coachRace(),tk=todayKey(),f=(S.me||{}).forme||{},s=r?(r.plan||[]).filter(function(p){return p.date===tk})[0]:null;
+  var up=r&&r.status!=="done"&&days(r.date)>=0;
+  var h='<div class="coach cpage"><div class="ct"><span class="ci2">'+BUB+'</span><div><b>Ce que sait ton coach</b><span>'+(r?esc((up?jx(r.date)+" · ":"")+r.name):"Aucune course prévue")+'</span></div></div>'+
+    '<div class="cfacts"><div style="background:'+(s?DCOL[dayType(s,r)]:"var(--rest)")+'"><u>Aujourd\'hui</u><b>'+(s?esc(s.title):"Pas de séance")+'</b>'+(s&&s.detail?'<span>'+esc(s.detail)+'</span>':"")+'</div>'+
+    '<div style="background:var(--sky)"><u>Forme</u><b>'+(f.condition!=null?"Condition "+esc(String(f.condition)):"—")+'</b><span>'+[f.fatigue!=null?"fatigue "+f.fatigue:"",f.tsb!=null?"fraîcheur "+f.tsb:""].filter(Boolean).map(esc).join(" · ")+'</span></div></div></div>';
+  if(!S.sample)return h+'<div class="empty" style="margin-top:12px">Le coach est indisponible pour le moment.</div>';
+  h+='<button class="coachbtn" data-lastrun="1"'+(S.cctl?" disabled":"")+'><i>🏃</i><div><b>Analyse ma dernière sortie</b><span>Le coach lit ta dernière activité Strava et la compare au plan</span></div></button>';
+  var C=S.chat||[];
+  if(!C.length){var qs=["J'ai mal dormi, j'adapte ma séance ?","Quelle allure s'il fait 22 °C ?","Que manger la veille ?","Comment gérer le départ ?","J'ai une gêne, je cours ?"];
+    h+='<h3>Questions rapides</h3><div class="sug" style="margin-top:0">'+qs.map(function(q){return '<button data-cq="'+esc(q)+'">'+esc(q)+'</button>'}).join("")+'</div>'}
+  else h+='<div class="chat" style="margin-top:16px">'+C.map(function(m,i){return '<div class="msg '+(m.role==="user"?"u":"bot"+(m.wait?" wait":""))+'"'+(i===C.length-1?' id="clast"':"")+'>'+esc(m.show||m.content)+'</div>'}).join("")+'</div>';
+  h+='<form class="ask" id="cform"><input id="cq" placeholder="Pose ta question au coach" aria-label="Question au coach" autocomplete="off"><button aria-label="'+(S.cctl?"Arrêter":"Envoyer")+'">'+(S.cctl?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>')+'</button></form>';
+  if(C.length)h+='<div style="text-align:center;margin-top:10px"><button class="back" data-nav="coach">Nouvelle conversation</button></div>';
+  return h}
+function askCoach(q,show){if(!S.sample||!q||S.cctl)return;var r=coachRace();S.chat=S.chat||[];
+  S.chat.push({role:"user",content:q,show:show});var bot={role:"assistant",content:"Réflexion…",wait:true};S.chat.push(bot);
+  var ctl=S.cctl=new AbortController();render();endChat();
+  var ctx=r?coachCtx(r):"Tu es le coach de course à pied de Killian. Réponds en français, court et concret.";
+  var turns=S.chat.slice(0,-1).map(function(m){return {role:m.role,content:m.content}});
+  S.sample([{role:"user",content:ctx}].concat(turns),{cache:false,signal:ctl.signal,onText:function(u){bot.wait=false;bot.content=u.text;var el=$("clast");if(el){el.classList.remove("wait");el.textContent=u.text}}})
+   .then(function(res){bot.content=res.text+(res.truncated?"\n\n(Réponse coupée : pose une question plus précise.)":"")})
+   .catch(function(e){var c=e&&e.code;
+     bot.content=c==="cancelled"?(e.text||"Arrêté."):c==="rate_limited"?"Trop de questions d'un coup : réessaie dans quelques minutes.":c==="sampling_disabled"?"Le coach n'est pas configuré sur le serveur.":(e.text?e.text+"\n\n":"")+"Réponse interrompue. Renvoie ta question."})
+   .then(function(){bot.wait=false;if(S.cctl===ctl)S.cctl=null;if(S.view==="coach"){render();endChat()}})}
+function endChat(){var el=$("cform");if(el)el.scrollIntoView({block:"end",behavior:"smooth"})}
+function lastRun(){if(!S.mcp||S.cctl)return;var b=document.querySelector("[data-lastrun] b");if(b)b.textContent="Lecture de Strava…";
+  S.mcp.callTool("Strava","list_activities",{first:5}).then(function(res){var p=pl(res),A=(p&&p.activities)||[];
+    var a=A.filter(function(x){return /Run/.test(x.sport_type||"")})[0]||A[0];
+    if(!a){toast("Aucune activité Strava trouvée");render();return}
+    var m=a.summary||{},km=(m.distance||0)/1000,t=m.moving_time||m.elapsed_time;
+    var info=[a.name,(a.start_local||"").replace("T"," à ").slice(0,18),a.sport_type,km?km.toFixed(2)+" km":"",t?"durée "+hms(t):"",km&&t?"allure "+pace(t,km)+"/km":"",
+      m.avg_hr?"FC moy "+Math.round(m.avg_hr):"",m.max_hr?"FC max "+Math.round(m.max_hr):"",m.elev?"D+ "+Math.round(m.elev)+" m":"",m.relative_effort?"effort relatif "+m.relative_effort:"",a.description?"note : "+a.description:""].filter(Boolean).join(" · ");
+    askCoach("Analyse ma dernière sortie Strava et compare-la à ce qui était prévu dans mon plan ce jour-là. Dis-moi ce qui est bien, ce qui l'est moins, et ce que j'en fais pour la suite.\n\n"+info,"Analyse ma dernière sortie : "+a.name)
+  }).catch(function(e){toast(e&&e.code==="server_not_connected"?"Connecte Strava (cloche)":"Strava indisponible");render()})}
 
 /* ── VDOT (Daniels) ── */
 function vdot(km,s){if(!km||!s)return null;var t=s/60,v=km*1000/t;
@@ -823,15 +827,16 @@ function bind(){
   document.querySelectorAll("[data-tab]").forEach(function(b){b.onclick=function(){S.tab=b.dataset.tab;render()}});
   document.querySelectorAll("[data-add]").forEach(function(b){b.onclick=addSheet});
   document.querySelectorAll("[data-result]").forEach(function(b){b.onclick=resultSheet});
-  document.querySelectorAll("[data-coach]").forEach(function(b){b.onclick=b.dataset.coach==="home"?function(){var q=$("hq");if(q){q.scrollIntoView({block:"center"});q.focus()}}:coachSheet});
+  document.querySelectorAll("[data-coach]").forEach(function(b){b.onclick=function(){var id=S.raceId;go("coach");S.coachRace=id;render()}});
+  document.querySelectorAll("[data-cq]").forEach(function(b){b.onclick=function(){askCoach(b.dataset.cq)}});
+  document.querySelectorAll("[data-lastrun]").forEach(function(b){b.onclick=lastRun});
+  var cf=$("cform");if(cf)cf.onsubmit=function(e){e.preventDefault();if(S.cctl){S.cctl.abort();return}var q=$("cq").value.trim();if(q)askCoach(q)};
   document.querySelectorAll("[data-day]").forEach(function(b){b.onclick=function(){S.dayIdx=+b.dataset.day;render()}});
   document.querySelectorAll("[data-dayd]").forEach(function(b){b.onclick=function(){var n=upcoming()[0];(n.plan||[]).forEach(function(q,i){if(q.date===b.dataset.dayd)S.dayIdx=i});render();scrollTo({top:0,behavior:"smooth"})}});
   document.querySelectorAll("[data-goplan]").forEach(function(b){b.onclick=function(){go("race",b.dataset.goplan,"plan")}});
   document.querySelectorAll("[data-done]").forEach(function(b){b.onclick=function(){var n=upcoming()[0];if(!n)return;var i=b.dataset.done;
     n.checks=Object.assign({},n.checks);n.checks.tap=Object.assign({},n.checks.tap);n.checks.tap[i]=!n.checks.tap[i];
     var patch={checks:{tap:{}}};patch.checks.tap[i]=n.checks.tap[i];render();write(n.id,patch);if(n.checks.tap[i])toast("Bien joué, séance cochée")}});
-  document.querySelectorAll("[data-hq]").forEach(function(b){b.onclick=function(){askHome(b.dataset.hq)}});
-  var hf=$("hform");if(hf)hf.onsubmit=function(e){e.preventDefault();var q=$("hq").value.trim();if(q)askHome(q)};
   document.querySelectorAll("[data-import]").forEach(function(b){b.onclick=importSheet});
   document.querySelectorAll("[data-gen]").forEach(function(b){b.onclick=genFiche});
   if(S.view==="forme"){watchStrava();drawProg()}
