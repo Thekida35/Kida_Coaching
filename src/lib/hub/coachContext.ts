@@ -1,5 +1,6 @@
 import { readStore, kvGet, kvSet } from "@/lib/hub/db";
 import { api, NotConnected } from "@/lib/hub/strava";
+import { filesContext, listFiles } from "@/lib/hub/files";
 
 /** Profil de départ du coach : ce qu'on sait de Killian en dehors des chiffres. Modifiable depuis l'onglet Coach. */
 export const DEFAULT_NOTES = `IDENTITÉ
@@ -126,6 +127,7 @@ type Race = Record<string, unknown> & { id: string; name: string; date: string; 
 export async function coachContext(raceId?: string | null) {
   const { races, me } = (await readStore()) as { races: Race[]; me: Record<string, unknown> | null };
   const notes = (await kvGet<string>("coach_notes")) ?? DEFAULT_NOTES;
+  const files = await listFiles();
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
   const upcoming = races.filter((r) => r.status !== "done" && r.date >= today).sort((a, b) => (a.date < b.date ? -1 : 1));
   const past = races.filter((r) => !upcoming.includes(r)).sort((a, b) => (a.date < b.date ? 1 : -1));
@@ -156,6 +158,7 @@ export async function coachContext(raceId?: string | null) {
     upcoming.filter((r) => r !== focus).length ? `\n=== AUTRES COURSES À VENIR ===\n${upcoming.filter((r) => r !== focus).map((r) => `${r.date} · ${r.name} · ${r.distanceKm ?? "?"} km`).join("\n")}` : "",
     pastLines.length ? `\n=== COURSES PASSÉES ===\n${pastLines.join("\n")}` : "",
     me ? `\n=== FORME, RECORDS ET PRÉDICTIONS (JSON, relevés Garmin / intervals.icu) ===\n${JSON.stringify(me)}` : "",
+    files.length ? `\n=== DOCUMENTS DONNÉS PAR KILLIAN (fiches lues depuis ses fichiers : photos, PDF, séances, tableurs) ===\n${filesContext(files)}` : "",
     `\n=== HISTORIQUE STRAVA ===\n${strava}`,
-  ].filter(Boolean).join("\n").slice(0, 120000);
+  ].filter(Boolean).join("\n").slice(0, 200000);
 }
