@@ -92,6 +92,8 @@ Les tables se créent toutes seules à la première mise en ligne.
 ### 3. Le coach : clé Gemini
 Sur [aistudio.google.com/apikey](https://aistudio.google.com/apikey), crée une clé : c'est ton `GEMINI_API_KEY`.
 
+> 💡 **Facultatif — un coach plus fin avec Claude.** Ajoute une clé API Anthropic ([console.anthropic.com](https://console.anthropic.com), crédits prépayés, facturés à part d'un abonnement claude.ai) dans `ANTHROPIC_API_KEY` : le coach passe automatiquement sur Claude (`CLAUDE_MODEL`, `claude-opus-5` par défaut). Gemini continue de lire les photos et PDF.
+
 ### 4. Les notifications : clés VAPID
 Sur ton ordinateur :
 ```bash
@@ -111,6 +113,7 @@ Tu obtiens une clé publique (`VAPID_PUBLIC_KEY`) et une clé privée (`VAPID_PR
 | `CRON_SECRET` | une autre phrase aléatoire (protège les notifications planifiées) |
 | `APP_URL` | l'adresse de ton app, ex. `https://mon-kida.vercel.app` |
 | `GEMINI_API_KEY` | la clé Gemini (étape 3) |
+| `ANTHROPIC_API_KEY` | *facultatif*, pour que le coach utilise Claude |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | les clés de l'étape 4 |
 | `STRAVA_CLIENT_ID` / `STRAVA_CLIENT_SECRET` | à l'étape 6 (tu peux les ajouter après) |
 | `GEMINI_MODEL` | *facultatif*, `gemini-2.5-flash` par défaut |

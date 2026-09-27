@@ -22,7 +22,12 @@ Prod : https://kida-coaching.vercel.app (Vercel, déploiement auto à chaque mer
   Le middleware laisse passer sans cookie : login, manifeste, icônes, `sw.js`, `/api/cron/*`, `/api/strava/callback`.
 - **Base** : PostgreSQL (Neon) via Prisma. Tables utiles : `HubDoc` (courses + profil « me »), `KV` (clé → JSON), `PushSub`.
   Les autres tables du schéma (ancienne app « Tempo ») sont **gardées exprès** : `prisma db push` tourne au build, les supprimer effacerait des données.
-- **IA** : Gemini via le SDK OpenAI (`lib/ai.ts`, `GEMINI_API_KEY`, `GEMINI_MODEL`). `AI_BASE_URL` permet de brancher un faux serveur en test.
+- **IA** (`lib/ai.ts`, `coachStream` / `coachComplete`) : **Claude** dès que `ANTHROPIC_API_KEY` est sur Vercel (`CLAUDE_MODEL`, défaut `claude-opus-5`,
+  réflexion adaptative, effort `medium`, contexte stable mis en cache, date du jour hors cache, relais `fallbacks: "default"` si refus) ;
+  sinon **Gemini** via le SDK OpenAI (`GEMINI_API_KEY`, `GEMINI_MODEL`). L'API Claude est **facturée à part** de l'abonnement claude.ai de Killian.
+  Gemini lit toujours les photos/PDF. `AI_BASE_URL` permet de brancher un faux serveur en test.
+- **Ton du coach** : `COACH_STYLE` dans `coachContext.ts`, recopié de sa conversation avec son projet Claude (verdict en gras d'abord,
+  chiffres comparés à SA normale, tableaux ✅ ⚠️, règles 🟢/🟠/🔴, « Vas-y. 👊 »). C'est ce qu'il juge « bon » : ne pas l'affadir.
 
 ### Interface (`public/`)
 

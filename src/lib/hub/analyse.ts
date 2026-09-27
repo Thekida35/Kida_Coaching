@@ -1,4 +1,4 @@
-import { aiClient, AI_MODEL } from "@/lib/ai";
+import { coachComplete, coachReady } from "@/lib/ai";
 import { kvGet, kvSet } from "@/lib/hub/db";
 import { coachContext } from "@/lib/hub/coachContext";
 import { loadChat, saveChat } from "@/lib/hub/chat";
@@ -67,8 +67,10 @@ export function describe(a: Detail, weather: string) {
 }
 
 const ASK = `Analyse automatique de la sortie qui vient d'arriver sur Strava (Killian ne l'a pas encore demandée).
-Format : une première ligne « **Verdict :** … » en une phrase, puis ### Ce qui s'est passé (tours ou km clés, FC, météo si elle a pesé), ### Par rapport au plan (compare avec la séance prévue ce jour-là s'il y en a une), ### Pour la suite (1 à 3 consignes concrètes pour les prochains jours).
-Reste court : 150 à 250 mots. Si un signal d'alerte apparaît (dérive cardiaque anormale, douleur citée dans le ressenti), dis-le clairement.`;
+Même ton et même format que tes analyses de séance : « ### Verdict » puis la conclusion en une phrase en gras ;
+un tableau des tours ou des kilomètres utiles (allure, FC, ✅ ⚠️) ; « ### Lecture » (le placement par rapport à son seuil et à sa normale,
+la météo ou l'heure si elles ont pesé, la comparaison avec la séance prévue ce jour-là) ; « ### Pour la suite » (1 à 3 consignes précises).
+200 à 350 mots. Si un signal d'alerte apparaît (dérive cardiaque anormale, douleur citée dans le ressenti), dis-le clairement.`;
 
 /** Première ligne lisible du verdict, pour le texte de la notification. */
 export function verdictLine(md: string) {
@@ -78,7 +80,7 @@ export function verdictLine(md: string) {
 }
 
 export async function analyseNewRun(now = Date.now()) {
-  if (!stravaConfigured() || !process.env.GEMINI_API_KEY) return "non configuré";
+  if (!stravaConfigured() || !coachReady()) return "non configuré";
   const state = await kvGet<{ lastId: number }>(KEY);
   const recent = ((await api("/athlete/activities?per_page=10")) as Summary[]).filter((a) => /Run/.test(a.sport_type));
   const newest = Math.max(0, ...recent.map((a) => a.id));
@@ -97,11 +99,7 @@ export async function analyseNewRun(now = Date.now()) {
 
   const a = (await api(`/activities/${todo.id}`)) as Detail;
   const [weather, ctx] = await Promise.all([weatherAt(a).catch(() => "indisponible"), coachContext()]);
-  const res = await aiClient().chat.completions.create({
-    model: AI_MODEL,
-    messages: [{ role: "system", content: ctx }, { role: "user", content: `${ASK}\n\n${describe(a, weather)}` }],
-  });
-  const text = res.choices[0]?.message?.content?.trim();
+  const text = await coachComplete(ctx, `${ASK}\n\n${describe(a, weather)}`);
   if (!text) return "réponse vide";
 
   const chat = await loadChat();

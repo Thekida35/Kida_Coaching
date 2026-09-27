@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { aiClient, AI_MODEL } from "@/lib/ai";
+import { coachReady, coachStream, RateLimited, type Turn } from "@/lib/ai";
 import { coachContext } from "@/lib/hub/coachContext";
 import { CONTEXT_TURNS, loadChat, saveChat, type ChatMsg } from "@/lib/hub/chat";
 import { listFiles } from "@/lib/hub/files";
@@ -24,7 +24,7 @@ export async function DELETE() {
  * la réponse (même partielle si la connexion coupe) à la fin du flux.
  */
 export async function POST(req: NextRequest) {
-  if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "sampling_disabled" }, { status: 503 });
+  if (!coachReady()) return NextResponse.json({ error: "sampling_disabled" }, { status: 503 });
   const b = await req.json().catch(() => null);
   const ids: string[] = Array.isArray(b?.fileIds) ? b.fileIds.filter((x: unknown) => typeof x === "string").slice(0, 10) : [];
   const files = ids.length ? (await listFiles()).filter((f) => ids.includes(f.id)).map(({ id, name, kind }) => ({ id, name, kind })) : [];
@@ -36,20 +36,19 @@ export async function POST(req: NextRequest) {
   const msgs: ChatMsg[] = [...history, { role: "user", content: message, t: Date.now(), ...(files.length ? { files } : {}) }];
   await saveChat(msgs);
 
+  const turns: Turn[] = msgs.slice(-CONTEXT_TURNS).map(({ role, content, files: f }) => ({
+    role,
+    content: f?.length ? `${content}\n\n[Fichier(s) joint(s) : ${f.map((x) => x.name).join(", ")} — leur fiche est dans DOCUMENTS DONNÉS PAR KILLIAN.]` : content,
+  }));
+  while (turns[0]?.role === "assistant") turns.shift(); // la conversation envoyée doit commencer par Killian
+
   let completion;
   try {
-    completion = await aiClient().chat.completions.create({
-      model: AI_MODEL,
-      stream: true,
-      messages: [{ role: "system", content: ctx }, ...msgs.slice(-CONTEXT_TURNS).map(({ role, content, files: f }) => ({
-        role,
-        content: f?.length ? `${content}\n\n[Fichier(s) joint(s) : ${f.map((x) => x.name).join(", ")} — leur fiche est dans DOCUMENTS DONNÉS PAR KILLIAN.]` : content,
-      }))],
-    });
+    completion = await coachStream(ctx, turns);
   } catch (e) {
     console.error("[/api/coach/chat]", e);
-    const status = (e as { status?: number }).status;
-    return NextResponse.json({ error: status === 429 ? "rate_limited" : "upstream_error" }, { status: status === 429 ? 429 : 502 });
+    const limited = e instanceof RateLimited;
+    return NextResponse.json({ error: limited ? "rate_limited" : "upstream_error" }, { status: limited ? 429 : 502 });
   }
 
   const enc = new TextEncoder();
@@ -64,23 +63,21 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        for await (const chunk of completion) {
-          const delta = chunk.choices[0]?.delta?.content ?? "";
-          if (!delta) continue;
+        for await (const delta of completion.stream) {
           text += delta;
           controller.enqueue(enc.encode(delta));
         }
         await finish();
       } catch (e) {
         console.error("[/api/coach/chat] stream", e);
-        const note = "\n\n_(Réponse interrompue.)_";
+        const note = e instanceof RateLimited ? "\n\n_(Trop de messages d'un coup : réessaie dans quelques minutes.)_" : "\n\n_(Réponse interrompue.)_";
         controller.enqueue(enc.encode(note));
         await finish(note);
       }
       controller.close();
     },
     async cancel() {
-      completion.controller.abort();
+      completion.abort();
       await finish("\n\n_(Arrêté.)_");
     },
   });

@@ -11,12 +11,12 @@ vi.mock("@/lib/hub/strava", () => ({
   stravaConfigured: () => true,
   api: async (p: string) => (p.startsWith("/athlete/activities") ? strava.list : strava.detail),
 }));
-vi.mock("@/lib/hub/coachContext", () => ({ coachContext: async () => "contexte" }));
+vi.mock("@/lib/hub/coachContext", () => ({ coachContext: async () => ({ system: "contexte", now: "aujourd'hui" }) }));
 vi.mock("@/lib/hub/chat", () => ({ loadChat: async () => chat, saveChat: async (m: typeof chat) => void (chat = m) }));
 vi.mock("@/lib/hub/push", () => ({ sendAll: async (p: (typeof sent)[number]) => void sent.push(p) }));
 vi.mock("@/lib/ai", () => ({
-  AI_MODEL: "test",
-  aiClient: () => ({ chat: { completions: { create: async () => ({ choices: [{ message: { content: "**Verdict :** séance réussie, allure tenue.\n\n### Détail\n…" } }] }) } } }),
+  coachReady: () => true,
+  coachComplete: async () => "### Verdict\n**Verdict :** séance réussie, allure tenue.\n\n### Détail\n…",
 }));
 
 const { analyseNewRun, verdictLine, describe: describeRun } = await import("./analyse");
