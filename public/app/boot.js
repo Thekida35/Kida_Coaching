@@ -16,7 +16,8 @@ function bind(){
   document.querySelectorAll("[data-newchat]").forEach(function(b){b.onclick=newChat});
   var cf=$("cform");if(cf){var cq=$("cq"),grow=function(){cq.style.height="auto";cq.style.height=Math.min(cq.scrollHeight,140)+"px"};
     cq.value=S.draft||"";grow();cq.oninput=function(){S.draft=cq.value;grow();fitChat()};
-    cf.onsubmit=function(e){e.preventDefault();if(S.cctl){S.cctl.abort();return}var q=cq.value.trim();if(q){S.draft="";askCoach(q)}}}
+    cf.onsubmit=function(e){e.preventDefault();if(S.cctl){S.cctl.abort();return}var q=cq.value.trim();if(q||S.cfiles.length)askCoach(q)}
+    $("cclip").onclick=function(){$("cfile").click()};$("cfile").onchange=function(){addFiles(this.files);this.value=""};paintFiles()}
   document.querySelectorAll("[data-day]").forEach(function(b){b.onclick=function(){S.dayIdx=+b.dataset.day;render()}});
   document.querySelectorAll("[data-dayd]").forEach(function(b){b.onclick=function(){var n=upcoming()[0];(n.plan||[]).forEach(function(q,i){if(q.date===b.dataset.dayd)S.dayIdx=i});render();scrollTo({top:0,behavior:"smooth"})}});
   document.querySelectorAll("[data-goplan]").forEach(function(b){b.onclick=function(){go("race",b.dataset.goplan,"plan")}});

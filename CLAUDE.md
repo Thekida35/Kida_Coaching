@@ -49,6 +49,11 @@ Le service worker sert `/` et `/app/*` depuis le cache puis les met à jour en a
   Envoie une fois par jour chacun : brief (heure choisie, jusqu'à +3 h), veille de séance clé (20 h), bilan de course (20 h 30). Marqueurs dans KV `notif_sent`.
 - `analyse.ts` : **coach proactif**, appelé à chaque `runTick` : nouvelle course à pied Strava (< 36 h, KV `analysed.lastId`) → détail + tours + km + météo Open-Meteo → analyse Gemini → rangée dans le chat + notification « 📊 Analyse prête » qui ouvre `/?v=coach`.
   Au tout premier passage il ne fait que noter la dernière sortie (pas d'analyse rétroactive).
+- `files.ts` : **fichiers donnés au coach** (trombone du chat, `POST /api/coach/files`, nom dans l'en-tête `X-File-Name`, 4 Mo max,
+  photos réduites côté app). Transformés une fois en fiche texte : images et PDF lus par Gemini **API native** (`generateContent`, `inline_data` ;
+  la couche OpenAI ne prend pas les PDF ; `GEMINI_NATIVE_URL` pour un faux serveur), `.fit` (fit-file-parser), `.gpx/.tcx` (lecture maison),
+  `.xlsx` (read-excel-file), csv/txt. Gardés pour toujours dans KV `coach_files` (40 max), relus avant chaque réponse (60 000 caractères, plus récents d'abord).
+  Liste et suppression dans « Mes notes ».
 - `prefs.ts` (KV `prefs`) : heure du brief et interrupteurs `brief | veille | bilan | analyse`.
 - `push.ts` → `sendAll()` range aussi chaque notification dans la cloche (`inbox.ts`, KV `inbox`, `inbox_seen`).
 - `strava.ts` : jetons OAuth (KV `strava`, rafraîchis automatiquement). Retour OAuth fixe sur `APP_URL` ou le domaine de prod ; « redirect_uri invalid » = mauvais `STRAVA_CLIENT_ID` (le bon est 282340) ou domaine non déclaré sur strava.com/settings/api.

@@ -324,3 +324,24 @@ nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stro
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 /* marge de la barre d'état comprise dans la hauteur de l'app */
 .app{padding-top:env(safe-area-inset-top,0px);box-sizing:border-box}
+
+/* fichiers joints au coach */
+#cform{flex-wrap:wrap;padding-left:6px}
+#cform.hasfiles{border-radius:26px}
+.ask .clip{background:transparent;color:var(--mid);width:40px;height:40px;flex:0 0 40px}
+.ask .clip svg{width:21px;height:21px}
+.cfiles{display:none;flex-basis:100%;gap:6px;flex-wrap:wrap;padding:4px 4px 2px}
+#cform.hasfiles .cfiles{display:flex}
+.cfile{display:inline-flex;align-items:center;gap:6px;max-width:100%;background:var(--bg);border-radius:999px;padding:5px 6px 5px 11px;font:600 13px Urbanist,sans-serif;color:var(--ink);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cfile i{font-style:normal;font-weight:500;color:var(--mid)}
+.cfile.up{animation:blink 1.4s ease-in-out infinite}
+.ask .cfile button{width:22px;height:22px;flex:0 0 22px;background:rgba(15,16,18,.08);color:var(--ink);font-size:15px;line-height:1}
+.mfiles{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+.mfiles span{background:rgba(255,255,255,.16);border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+.docs-h{font-size:15px;margin:14px 0 6px}
+.doc{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:16px;padding:10px 10px 10px 12px;margin-bottom:6px}
+.doc>span{font-size:20px}
+.doc>div{flex:1;min-width:0}
+.doc b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc small{display:block;font-size:12.5px;color:var(--mid);line-height:1.35}
+.doc button{border:0;background:var(--soft);width:30px;height:30px;border-radius:50%;font-size:16px;flex:0 0 30px;color:var(--ink)}

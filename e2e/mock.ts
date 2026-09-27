@@ -24,6 +24,8 @@ export function makeState() {
     weather: null as unknown, // null → météo indisponible (503)
     activities: null as unknown[] | null, // null → Strava indisponible (503)
     gear: null as unknown[] | null,
+    files: [] as { id: string; name: string; kind: string; summary: string }[],
+    lastChat: null as Record<string, unknown> | null,
     reply: "**Verdict :** bonne séance.\n\n| km | Allure |\n|---|---|\n| 1 | 3:40 |\n\n- Garde ce rythme",
   };
 }
@@ -60,11 +62,23 @@ export async function mockApp(page: Page, s: State) {
       if (m === "POST") s.unseen = 0;
       return json(r, { items: s.inbox, unseen: s.unseen });
     }
+    if (p === "/api/coach/files") {
+      if (m === "DELETE") s.files = s.files.filter((f) => f.id !== u.searchParams.get("id"));
+      if (m === "POST") {
+        const name = decodeURIComponent(req.headers()["x-file-name"] ?? "");
+        const f = { id: "f" + (s.files.length + 1), name, kind: name.endsWith(".csv") ? "tableur" : "texte", summary: "Suivi des kilomètres" };
+        s.files.unshift(f);
+        return json(r, { file: f });
+      }
+      return json(r, { files: s.files });
+    }
+    if (p === "/api/coach/notes") return json(r, { notes: "Mes notes" });
     if (p === "/api/coach/chat") {
       if (m === "GET") return json(r, { messages: s.chat });
       if (m === "DELETE") return (s.chat = []), json(r, { ok: true });
-      const q = JSON.parse(req.postData() || "{}").message;
-      s.chat.push({ role: "user", content: q, t: Date.now() }, { role: "assistant", content: s.reply, t: Date.now() });
+      const body = JSON.parse(req.postData() || "{}");
+      s.lastChat = body;
+      s.chat.push({ role: "user", content: body.message, t: Date.now() }, { role: "assistant", content: s.reply, t: Date.now() });
       return r.fulfill({ status: 200, contentType: "text/plain; charset=utf-8", body: s.reply });
     }
     if (p === "/api/strava/status") return json(r, { configured: true, connected: true, athlete: "Killian" });

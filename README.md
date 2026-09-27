@@ -53,6 +53,8 @@ Une vraie conversation, gardée d'une ouverture à l'autre. Le coach connaît :
 
 Les réponses arrivent au fil de l'eau, mises en forme (titres, tableaux, listes).
 
+📎 **Donne-lui tes fichiers** avec le trombone : photos ou captures, PDF (bilan de kiné, plan, règlement), séances de montre (`.fit`, `.gpx`, `.tcx`), tableurs (`.xlsx`, `.csv`) ou textes. Il les lit une fois et **s'en souvient pour toujours** ; la liste se gère dans **Mes notes**.
+
 ### 📊 Analyse automatique de tes sorties
 Dès qu'une course à pied arrive sur Strava, le coach l'analyse **sans que tu demandes rien** : verdict, tours et kilomètres, FC, météo au départ, comparaison avec la séance prévue, consignes pour la suite. L'analyse t'attend dans le chat et une notification te prévient.
 

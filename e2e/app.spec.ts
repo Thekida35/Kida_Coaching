@@ -38,7 +38,7 @@ test("coach : réponse mise en forme et conversation gardée", async ({ page }) 
   await page.goto("/?v=coach");
   await expect(page.getByText("Ton coach")).toBeVisible();
   await page.fill("#cq", "Comment était ma séance ?");
-  await page.click("#cform button");
+  await page.click("#cform button[aria-label=Envoyer]");
   await expect(page.locator(".msg.u")).toHaveText("Comment était ma séance ?");
   await expect(page.locator(".msg.bot table")).toBeVisible();
   await expect(page.locator(".msg.bot b").first()).toHaveText("Verdict :");
@@ -64,4 +64,23 @@ test("réglages : couper l'analyse des sorties", async ({ page }) => {
   await expect(page.getByText("Analyse de mes sorties")).toBeVisible();
   await page.locator("#na").uncheck({ force: true });
   await expect.poll(() => s.prefs.notify.analyse).toBe(false);
+});
+
+test("coach : joindre un fichier, puis le retrouver dans Mes notes", async ({ page }) => {
+  await login(page);
+  await page.goto("/?v=coach");
+  await page.locator("#cfile").setInputFiles({ name: "suivi.csv", mimeType: "text/csv", buffer: Buffer.from("date;km\n2026-09-20;12") });
+  await expect(page.locator(".cfile")).toContainText("suivi.csv");
+  await expect(page.locator(".cfile.up")).toHaveCount(0);
+  await page.click("#cform button[aria-label=Envoyer]");
+  await expect(page.locator(".msg.u .mfiles")).toContainText("suivi.csv");
+  expect(s.lastChat).toMatchObject({ fileIds: ["f1"] });
+  await expect(page.locator(".cfile")).toHaveCount(0);
+
+  page.on("dialog", (d) => d.accept());
+  await page.click("[data-notes]");
+  await expect(page.locator(".doc")).toContainText("Suivi des kilomètres");
+  await page.click("[data-deldoc]");
+  await expect(page.locator(".doc")).toHaveCount(0);
+  expect(s.files).toEqual([]);
 });

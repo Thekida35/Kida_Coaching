@@ -1,6 +1,7 @@
 import { kvGet, kvSet } from "@/lib/hub/db";
 
-export type ChatMsg = { role: "user" | "assistant"; content: string; t: number };
+export type ChatFile = { id: string; name: string; kind: string };
+export type ChatMsg = { role: "user" | "assistant"; content: string; t: number; files?: ChatFile[] };
 
 const KEY = "coach_chat";
 const KEEP = 200; // messages conservés

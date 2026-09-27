@@ -16,10 +16,12 @@
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",
+    "fit-file-parser": "^6.1.2",
     "next": "^15.0.0",
     "openai": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "read-excel-file": "^9.3.10",
     "web-push": "^3.6.7"
   },
   "devDependencies": {
